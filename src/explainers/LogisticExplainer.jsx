@@ -8,9 +8,14 @@ import {
   logLoss,
   sigmoid,
   fitOLS,
+  classificationStats,
+  rocCurve,
 } from '../stats/regression';
 import DatasetPicker from '../components/DatasetPicker';
 import LogisticPlot from '../components/LogisticPlot';
+import ConfusionMatrix from '../components/ConfusionMatrix';
+import ROCCurve from '../components/ROCCurve';
+import LogisticWorkedExample from '../components/LogisticWorkedExample';
 
 function defaultStartLogit() {
   // A flat-ish starting curve so students see something obviously suboptimal.
@@ -39,9 +44,22 @@ export default function LogisticExplainer() {
 
   const [showFit, setShowFit] = useState(false);
   const [showLinear, setShowLinear] = useState(false);
+  const [threshold, setThreshold] = useState(0.5);
 
-  const userLoss = logLoss(points, (x) => sigmoid(curve.beta0 + curve.beta1 * x));
-  const bestLoss = logLoss(points, (x) => sigmoid(fit.beta0 + fit.beta1 * x));
+  const userPredict = (x) => sigmoid(curve.beta0 + curve.beta1 * x);
+  const bestPredict = (x) => sigmoid(fit.beta0 + fit.beta1 * x);
+  const userLoss = logLoss(points, userPredict);
+  const bestLoss = logLoss(points, bestPredict);
+
+  // Use the ML fit for confusion matrix and ROC — that's the "deployed" model;
+  // students manipulate the user curve in the earlier section to learn the
+  // interaction. (We could also use the user curve, but tying threshold tools
+  // to the best-fit model keeps the downstream metrics meaningful.)
+  const stats = useMemo(
+    () => classificationStats(points, bestPredict, threshold),
+    [points, fit, threshold]
+  );
+  const roc = useMemo(() => rocCurve(points, bestPredict), [points, fit]);
 
   const positiveCount = points.filter((p) => p.y === 1).length;
   const negativeCount = points.length - positiveCount;
@@ -293,11 +311,229 @@ export default function LogisticExplainer() {
             </div>
           </div>
         </div>
-        <p className="caption">
-          Coming next (in the next section we'll add): a confusion matrix
-          you can move with a threshold slider, an ROC curve with AUC, and
-          how to read the coefficient β₁ as an odds ratio.
+      </section>
+
+      <section>
+        <h2>Walk through one prediction</h2>
+        <p>
+          Pick three patients from the cohort and trace the calculation. Each
+          one starts as an <span className="eq">{dataset.xShort}</span>{' '}
+          value, becomes a linear score{' '}
+          <span className="eq">z = β₀ + β₁·{dataset.xShort}</span>, and then a
+          probability via the sigmoid. The decision step compares P to the
+          threshold (default 0.50).
         </p>
+        <LogisticWorkedExample
+          points={points}
+          beta0={fit.beta0}
+          beta1={fit.beta1}
+          threshold={threshold}
+          xShort={dataset.xShort}
+          positiveLabel={dataset.positiveLabel}
+          negativeLabel={dataset.negativeLabel}
+        />
+      </section>
+
+      <section>
+        <h2>Turning a probability into a decision</h2>
+        <p>
+          A probability is not yet a decision. Some clinical settings demand a
+          low threshold (you'd rather over-call than miss the diagnosis —{' '}
+          <em>screening</em>). Others demand a high threshold (acting on a
+          positive is invasive or expensive — <em>confirmation</em>). Move
+          the slider below; everything updates: the threshold line on the
+          curve, who the model labels positive, and the four cells of the
+          confusion matrix.
+        </p>
+
+        <LogisticPlot
+          points={points}
+          curve={curve}
+          onCurveChange={setCurve}
+          fit={fit}
+          linearFit={linearFit}
+          showFit={true}
+          showLinear={false}
+          showUserCurve={false}
+          threshold={threshold}
+          showThreshold={true}
+          xLabel={dataset.xLabel}
+          yLabel={dataset.yLabel}
+          xRange={dataset.xRange}
+          positiveLabel={dataset.positiveLabel}
+          negativeLabel={dataset.negativeLabel}
+        />
+
+        <div className="threshold-row">
+          <label htmlFor="threshold-slider" className="threshold-label-text">
+            Decision threshold
+          </label>
+          <input
+            id="threshold-slider"
+            type="range"
+            min={0.05}
+            max={0.95}
+            step={0.01}
+            value={threshold}
+            onChange={(e) => setThreshold(parseFloat(e.target.value))}
+          />
+          <span className="threshold-readout">t = {threshold.toFixed(2)}</span>
+          <div className="threshold-presets">
+            <button className="btn" onClick={() => setThreshold(0.2)}>
+              screening (0.20)
+            </button>
+            <button className="btn" onClick={() => setThreshold(0.5)}>
+              default (0.50)
+            </button>
+            <button className="btn" onClick={() => setThreshold(0.8)}>
+              confirmation (0.80)
+            </button>
+          </div>
+        </div>
+
+        <ConfusionMatrix
+          stats={stats}
+          positiveLabel={dataset.positiveLabel}
+          negativeLabel={dataset.negativeLabel}
+        />
+
+        <p className="caption">
+          As you raise the threshold, fewer patients get labelled{' '}
+          {dataset.positiveLabel}. Sensitivity drops (you catch fewer true
+          cases) but specificity rises (you call fewer healthy patients sick).
+          That trade-off is fundamental — there is no threshold that's best
+          for every setting.
+        </p>
+      </section>
+
+      <section>
+        <h2>The ROC curve and AUC</h2>
+        <p>
+          Sweeping the threshold from 1 down to 0 traces a curve through{' '}
+          <span className="eq">(false positive rate, sensitivity)</span>{' '}
+          space — the receiver operating characteristic, or ROC, curve. A
+          model that doesn't discriminate at all sits on the diagonal; a
+          perfect model jumps to the top-left corner. The area under the
+          curve (AUC) summarises discrimination across all thresholds.
+        </p>
+        <div className="roc-row">
+          <ROCCurve
+            roc={roc}
+            threshold={threshold}
+            onThresholdChange={setThreshold}
+          />
+          <div className="roc-narration">
+            <p>
+              <strong>AUC = {roc.auc.toFixed(3)}</strong> — the probability
+              that a randomly chosen{' '}
+              <span style={{ color: '#dc2626' }}>{dataset.positiveLabel}</span>{' '}
+              patient gets a higher score than a randomly chosen{' '}
+              <span style={{ color: '#1f6feb' }}>{dataset.negativeLabel}</span>{' '}
+              one. 0.5 means coin flip; 1.0 means perfect ranking.
+            </p>
+            <p>
+              The teal dot marks the threshold currently set in the section
+              above. Click anywhere on the plot to snap to a different
+              threshold and watch the confusion matrix above update.
+            </p>
+            <p>
+              <strong>Clinical context.</strong> AUC is <em>not</em> a
+              calibration measure — a model can have an excellent AUC and
+              still produce probabilities that don't match observed
+              frequencies. For decision-making you usually want both good
+              discrimination (AUC) and good calibration (predicted P actually
+              matches event rate). We don't dive into calibration here, but
+              know it exists.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Reading the coefficient — odds ratios</h2>
+        <p>
+          β₁ in logistic regression has a specific clinical meaning. Recall
+          the form:
+        </p>
+        <p className="eq-block">
+          log( P / (1 − P) ) = β₀ + β₁ · {dataset.xShort}
+        </p>
+        <p>
+          The left-hand side is the <strong>log-odds</strong>. β₁ is therefore
+          the change in log-odds per one-unit increase in{' '}
+          {dataset.xShort.toLowerCase()}. Exponentiating gives the{' '}
+          <strong>odds ratio</strong> per unit:
+        </p>
+        <div className="odds-grid">
+          <div className="odds-card">
+            <div className="odds-label">β₁ (log-odds per {dataset.xUnit})</div>
+            <div className="odds-value">{fit.beta1.toFixed(3)}</div>
+          </div>
+          <div className="odds-card">
+            <div className="odds-label">odds ratio per {dataset.xUnit}</div>
+            <div className="odds-value">{Math.exp(fit.beta1).toFixed(3)}</div>
+            <div className="odds-sub">exp(β₁)</div>
+          </div>
+          <div className="odds-card">
+            <div className="odds-label">odds ratio per 10 {dataset.xUnit}</div>
+            <div className="odds-value">{Math.exp(fit.beta1 * 10).toFixed(3)}</div>
+            <div className="odds-sub">exp(10·β₁)</div>
+          </div>
+        </div>
+        <p className="caption">
+          So in this simulated cohort, every additional 1 {dataset.xUnit} of{' '}
+          {dataset.xShort.toLowerCase()} multiplies the odds of being{' '}
+          {dataset.positiveLabel} by {Math.exp(fit.beta1).toFixed(2)}. A 10 ×{' '}
+          {dataset.xUnit} difference multiplies the odds by{' '}
+          {Math.exp(fit.beta1 * 10).toFixed(2)}. Odds ratios are how logistic
+          coefficients are usually reported in clinical literature.
+        </p>
+      </section>
+
+      <section>
+        <h2>Cautions for clinical use</h2>
+        <ul className="caveats">
+          <li>
+            <strong>The threshold matters more than the AUC.</strong> Every
+            deployed model has to commit to a threshold, and that choice
+            depends on the costs of false positives vs. false negatives in{' '}
+            <em>your</em> setting. Two clinics using the same model can —
+            correctly — pick different thresholds.
+          </li>
+          <li>
+            <strong>Class imbalance distorts metrics.</strong> If 5% of
+            patients have the outcome, a model that always predicts "no"
+            scores 95% accuracy and looks great. Always inspect sensitivity,
+            specificity, PPV, and NPV separately, and consider AUC over
+            accuracy.
+          </li>
+          <li>
+            <strong>PPV and NPV depend on prevalence.</strong> Sensitivity and
+            specificity are properties of the model. PPV and NPV change with
+            the population's base rate. A test that looks brilliant in a
+            high-prevalence specialist clinic can be useless in low-prevalence
+            screening.
+          </li>
+          <li>
+            <strong>Calibration ≠ discrimination.</strong> AUC tells you the
+            model can rank cases; it does not tell you the predicted
+            probabilities are honest. A model that outputs P = 0.80 should be
+            right ≈ 80% of the time. Always plot a calibration curve before
+            handing probabilities to clinicians.
+          </li>
+          <li>
+            <strong>One feature is rarely enough.</strong> Real risk scores
+            combine many predictors. Logistic regression scales naturally to
+            multiple inputs — and the coefficient on each feature is the
+            adjusted log-odds, holding the others fixed.
+          </li>
+          <li>
+            <strong>It's a baseline, not the destination.</strong> Logistic
+            regression is your null model for binary outcomes — the thing
+            every fancier classifier (random forest, gradient boosting,
+            neural net) should beat by enough to justify its complexity.
+          </li>
+        </ul>
       </section>
 
       <footer className="footer">

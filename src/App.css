@@ -1203,6 +1203,315 @@ code {
   font-weight: 600;
 }
 
+/* Threshold slider row (logistic page) ------------------------------------ */
+.threshold-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 14px 0 18px;
+  font-size: 14px;
+}
+
+.threshold-label-text {
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 11.5px;
+  min-width: 130px;
+}
+
+.threshold-row input[type='range'] {
+  flex: 1;
+  min-width: 180px;
+  accent-color: #0d9488;
+}
+
+.threshold-readout {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #0d9488;
+  min-width: 64px;
+  text-align: right;
+}
+
+.threshold-presets {
+  display: inline-flex;
+  gap: 6px;
+  flex-basis: 100%;
+  margin-left: 130px;
+}
+
+.threshold-presets .btn {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+@media (max-width: 700px) {
+  .threshold-presets {
+    margin-left: 0;
+  }
+}
+
+/* Confusion matrix ---------------------------------------------------------- */
+.confusion-block {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(220px, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin: 14px 0 18px;
+}
+
+.confusion-table-wrap {
+  overflow-x: auto;
+}
+
+.confusion-matrix {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+
+.confusion-matrix th,
+.confusion-matrix td {
+  padding: 10px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.confusion-matrix .ch-group {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-weight: 600;
+  padding-bottom: 0;
+}
+
+.confusion-matrix .ch-pos {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.confusion-matrix .ch-neg {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.confusion-matrix th {
+  font-family: var(--font-sans);
+  text-transform: lowercase;
+  letter-spacing: 0;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.confusion-matrix .rh-pos {
+  color: #b91c1c;
+  font-weight: 600;
+  text-align: right;
+  width: 110px;
+}
+
+.confusion-matrix .rh-neg {
+  color: #1f6feb;
+  font-weight: 600;
+  text-align: right;
+  width: 110px;
+}
+
+.cm-cell {
+  font-family: var(--font-mono);
+  border-radius: 6px;
+  width: 130px;
+  height: 84px;
+  position: relative;
+}
+
+.cm-cell .cm-count {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cm-cell .cm-tag {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 6px;
+  font-weight: 600;
+  opacity: 0.78;
+}
+
+.cm-cell.cm-tp {
+  background: rgba(16, 185, 129, 0.14);
+  color: #047857;
+}
+
+.cm-cell.cm-tn {
+  background: rgba(31, 111, 235, 0.12);
+  color: #1e40af;
+}
+
+.cm-cell.cm-fp {
+  background: rgba(220, 38, 38, 0.10);
+  color: #b91c1c;
+}
+
+.cm-cell.cm-fn {
+  background: rgba(217, 119, 6, 0.14);
+  color: #92400e;
+}
+
+.cm-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cm-stat {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.cm-stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.cm-stat-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.cm-stat-sub {
+  font-size: 11.5px;
+  color: var(--ink-mute);
+  margin-top: 3px;
+}
+
+@media (max-width: 700px) {
+  .confusion-block {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ROC -------------------------------------------------------------------- */
+.roc-row {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.roc-svg {
+  flex: 0 0 auto;
+}
+
+.roc-narration {
+  flex: 1;
+  min-width: 260px;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+
+.roc-narration p {
+  margin: 0 0 12px;
+}
+
+.roc-svg .auc-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.roc-svg .threshold-marker-label {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+/* Odds ratios ------------------------------------------------------------ */
+.odds-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 14px 0 14px;
+}
+
+.odds-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.odds-card .odds-label {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.odds-card .odds-value {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.odds-card .odds-sub {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-mute);
+  margin-top: 4px;
+}
+
+@media (max-width: 700px) {
+  .odds-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Logistic worked-example specific cells */
+.cell-decision-pos {
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.cell-decision-neg {
+  font-weight: 600;
+  color: #1f6feb;
+}
+
 /* Caveats list */
 .caveats {
   margin: 8px 0 0;
