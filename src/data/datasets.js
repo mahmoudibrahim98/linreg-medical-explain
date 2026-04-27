@@ -39,10 +39,10 @@ export const datasets = [
     yRange: [90, 180],
     n: 80,
     truth: { slope: 1.6, intercept: 82, noise: 11 },
-    sample(seed) {
+    sample(seed, n = this.n) {
       const rng = mulberry32(seed);
       const pts = [];
-      for (let i = 0; i < this.n; i++) {
+      for (let i = 0; i < n; i++) {
         const x = uniform(rng, 18, 40);
         const y = this.truth.intercept + this.truth.slope * x + gaussian(rng) * this.truth.noise;
         pts.push({ x, y: Math.max(this.yRange[0] + 1, Math.min(this.yRange[1] - 1, y)) });
@@ -68,10 +68,10 @@ export const datasets = [
     yRange: [4.0, 7.5],
     n: 100,
     truth: { slope: 0.025, intercept: 4.55, noise: 0.35 },
-    sample(seed) {
+    sample(seed, n = this.n) {
       const rng = mulberry32(seed);
       const pts = [];
-      for (let i = 0; i < this.n; i++) {
+      for (let i = 0; i < n; i++) {
         const x = uniform(rng, 22, 82);
         const y = this.truth.intercept + this.truth.slope * x + gaussian(rng) * this.truth.noise;
         pts.push({ x, y: Math.max(this.yRange[0] + 0.05, Math.min(this.yRange[1] - 0.05, y)) });
@@ -97,10 +97,10 @@ export const datasets = [
     yRange: [0, 95],
     n: 70,
     truth: { slope: 1.45, intercept: 6, noise: 8 },
-    sample(seed) {
+    sample(seed, n = this.n) {
       const rng = mulberry32(seed);
       const pts = [];
-      for (let i = 0; i < this.n; i++) {
+      for (let i = 0; i < n; i++) {
         const x = uniform(rng, 5, 50);
         const y = this.truth.intercept + this.truth.slope * x + gaussian(rng) * this.truth.noise;
         pts.push({ x, y: Math.max(0.5, Math.min(94, y)) });
@@ -126,10 +126,10 @@ export const datasets = [
     yRange: [-5, 30],
     n: 60,
     truth: { slope: 0.18, intercept: 0.4, noise: 2.6 },
-    sample(seed) {
+    sample(seed, n = this.n) {
       const rng = mulberry32(seed);
       const pts = [];
-      for (let i = 0; i < this.n; i++) {
+      for (let i = 0; i < n; i++) {
         const x = uniform(rng, 0, 100);
         const y = this.truth.intercept + this.truth.slope * x + gaussian(rng) * this.truth.noise;
         pts.push({ x, y });
@@ -139,8 +139,8 @@ export const datasets = [
   },
 ];
 
-export function generateDataset(dataset, seed) {
-  return dataset.sample(seed);
+export function generateDataset(dataset, seed, n) {
+  return dataset.sample(seed, n);
 }
 
 // Nonlinear scenarios — used in the section that shows the limits of a
@@ -170,11 +170,11 @@ export const nonlinearDatasets = [
       const EC50 = 30;
       return (Emax * x) / (EC50 + x);
     },
-    sample(seed) {
+    sample(seed, n = this.n) {
       const rng = mulberry32(seed);
       const sigma = 5.5;
       const pts = [];
-      for (let i = 0; i < this.n; i++) {
+      for (let i = 0; i < n; i++) {
         const x = uniform(rng, 0, 240);
         const y = this.truthFn(x) + gaussian(rng) * sigma;
         pts.push({ x, y });
@@ -206,11 +206,11 @@ export const nonlinearDatasets = [
       const tail = Math.max(0, x - 28);
       return 1 + 0.012 * sq + 0.00018 * tail * tail * tail;
     },
-    sample(seed) {
+    sample(seed, n = this.n) {
       const rng = mulberry32(seed);
       const sigma = 0.32;
       const pts = [];
-      for (let i = 0; i < this.n; i++) {
+      for (let i = 0; i < n; i++) {
         const x = uniform(rng, 17, 43);
         const y = this.truthFn(x) + gaussian(rng) * sigma;
         pts.push({ x, y: Math.max(0.35, y) });

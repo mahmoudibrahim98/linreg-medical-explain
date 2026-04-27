@@ -372,6 +372,51 @@ code {
   }
 }
 
+/* Sample-size slider row */
+.sample-size-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 4px;
+  font-size: 13.5px;
+}
+
+.sample-size-label {
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 11.5px;
+  min-width: 90px;
+}
+
+.sample-size-row input[type='range'] {
+  flex: 1;
+  min-width: 160px;
+  accent-color: var(--accent);
+}
+
+.sample-size-readout {
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 110px;
+  text-align: right;
+}
+
+.sample-size-hint {
+  font-size: 12.5px;
+  color: var(--muted);
+  font-style: italic;
+  flex-basis: 100%;
+  margin-left: 90px;
+}
+
 /* Prediction panel */
 .prediction-panel {
   background: rgba(124, 58, 237, 0.06);

@@ -35,9 +35,10 @@ export default function App() {
   const dataset = datasets.find((d) => d.id === datasetId);
 
   const [seed, setSeed] = useState(42);
+  const [sampleSize, setSampleSize] = useState(80);
   const points = useMemo(
-    () => generateDataset(dataset, seed),
-    [dataset, seed]
+    () => generateDataset(dataset, seed, sampleSize),
+    [dataset, seed, sampleSize]
   );
   const best = useMemo(() => fitOLS(points), [points]);
   const { slopeRange, interceptRange } = useMemo(
@@ -65,9 +66,10 @@ export default function App() {
   const [nlDatasetId, setNlDatasetId] = useState(nonlinearDatasets[0].id);
   const nlDataset = nonlinearDatasets.find((d) => d.id === nlDatasetId);
   const [nlSeed, setNlSeed] = useState(7);
+  const [nlSampleSize, setNlSampleSize] = useState(60);
   const nlPoints = useMemo(
-    () => nlDataset.sample(nlSeed),
-    [nlDataset, nlSeed]
+    () => nlDataset.sample(nlSeed, nlSampleSize),
+    [nlDataset, nlSeed, nlSampleSize]
   );
   const linearFit = useMemo(() => fitOLS(nlPoints), [nlPoints]);
   const polyFits = useMemo(
@@ -247,6 +249,24 @@ export default function App() {
                   New sample
                 </button>
               </div>
+            </div>
+
+            <div className="sample-size-row">
+              <label htmlFor="sample-size-slider" className="sample-size-label">
+                Cohort size
+              </label>
+              <input
+                id="sample-size-slider"
+                type="range"
+                min={5}
+                max={300}
+                step={1}
+                value={sampleSize}
+                onChange={(e) => setSampleSize(parseInt(e.target.value, 10))}
+              />
+              <span className="sample-size-readout">
+                n = {sampleSize} patient{sampleSize === 1 ? '' : 's'}
+              </span>
             </div>
 
             {predictionMode && (
@@ -457,6 +477,27 @@ export default function App() {
           >
             New sample
           </button>
+        </div>
+
+        <div className="sample-size-row">
+          <label htmlFor="nl-sample-size" className="sample-size-label">
+            Cohort size
+          </label>
+          <input
+            id="nl-sample-size"
+            type="range"
+            min={10}
+            max={300}
+            step={1}
+            value={nlSampleSize}
+            onChange={(e) => setNlSampleSize(parseInt(e.target.value, 10))}
+          />
+          <span className="sample-size-readout">
+            n = {nlSampleSize} patient{nlSampleSize === 1 ? '' : 's'}
+          </span>
+          <span className="sample-size-hint">
+            try a small n with high degree to see overfitting
+          </span>
         </div>
 
         <NonlinearPlot

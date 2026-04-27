@@ -118,8 +118,9 @@ export default function NonlinearPlot({
         .attr('opacity', 0.85);
     }
 
-    // Linear fit
-    if (linearFit) {
+    // Active fit: linear when degree=1, polynomial otherwise. Only one is
+    // rendered so the chart shows what the currently selected model predicts.
+    if (linearFit && polyFit && polyFit.degree === 1) {
       const x1 = xRange[0];
       const x2 = xRange[1];
       root
@@ -133,7 +134,6 @@ export default function NonlinearPlot({
         .attr('opacity', 0.95);
     }
 
-    // Polynomial fit (degree ≥ 2)
     if (polyFit && polyFit.degree >= 2) {
       const polyLine = d3
         .line()
