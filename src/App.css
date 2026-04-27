@@ -260,6 +260,65 @@ section.prose:first-of-type::before {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
+/* KaTeX-rendered math --------------------------------------------------- */
+.katex {
+  font-size: 1.04em !important;
+  color: var(--ink);
+}
+
+.katex-inline {
+  display: inline;
+}
+
+.katex-inline .katex {
+  font-size: 1em !important;
+  white-space: nowrap;
+}
+
+.katex-block {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  padding: 16px 24px;
+  border-radius: 8px;
+  margin: 16px 0 24px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.katex-block .katex {
+  font-size: 1.18em !important;
+}
+
+.katex-block .katex-display {
+  margin: 0;
+}
+
+/* In the formula cards, the equation should sit a bit larger and accented */
+.formula-equation {
+  margin-top: 6px;
+  color: var(--ink);
+}
+
+.formula-equation .katex {
+  font-size: 1.2em !important;
+}
+
+.formula-card.user .formula-equation .katex {
+  color: var(--ink);
+}
+
+.formula-card.best .formula-equation .katex {
+  color: var(--ink);
+}
+
+/* Inside table headers, KaTeX should match header sizing */
+.worked-table th .katex,
+.confusion-matrix th .katex {
+  font-size: 0.95em !important;
+  font-weight: 600;
+}
+
 code {
   font-family: var(--font-mono);
   background: rgba(0, 0, 0, 0.05);

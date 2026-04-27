@@ -16,6 +16,12 @@ import LogisticPlot from '../components/LogisticPlot';
 import ConfusionMatrix from '../components/ConfusionMatrix';
 import ROCCurve from '../components/ROCCurve';
 import LogisticWorkedExample from '../components/LogisticWorkedExample';
+import { InlineMath, BlockMath } from '../components/Math';
+
+function asMathLabel(label) {
+  if (!label) return '';
+  return label.length <= 1 ? label : `\\mathrm{${label}}`;
+}
 
 function defaultStartLogit() {
   // A flat-ish starting curve so students see something obviously suboptimal.
@@ -158,16 +164,21 @@ export default function LogisticExplainer() {
           any number to (0, 1). The standard choice is the{' '}
           <strong>logistic</strong> (or <em>sigmoid</em>) function:
         </p>
-        <p className="eq-block">
-          P(y = 1 | x) = σ(β₀ + β₁ · x) = 1 / (1 + exp(−(β₀ + β₁ · x)))
-        </p>
+        <BlockMath
+          math={String.raw`P(y = 1 \mid x) \;=\; \sigma(\beta_0 + \beta_1 x) \;=\; \frac{1}{1 + e^{-(\beta_0 + \beta_1 x)}}`}
+        />
         <p>
           Inside the parentheses we still have a familiar straight line —{' '}
-          <span className="eq">β₀ + β₁·x</span> — but the σ wrapper bends it
-          smoothly so the output is always between 0 and 1. β₀ shifts the
-          curve left and right; β₁ controls how steeply the curve transitions
-          from 0 to 1. A large positive β₁ means the outcome ramps up quickly
-          with x; a small β₁ means the curve is nearly flat.
+          <InlineMath math={String.raw`\beta_0 + \beta_1 x`} /> — but the
+          sigmoid wrapper bends it smoothly so the output is always between
+          0 and 1. <InlineMath math={String.raw`\beta_0`} /> shifts the
+          curve left and right;{' '}
+          <InlineMath math={String.raw`\beta_1`} /> controls how steeply the
+          curve transitions from 0 to 1. A large positive{' '}
+          <InlineMath math={String.raw`\beta_1`} /> means the outcome ramps
+          up quickly with x; a small{' '}
+          <InlineMath math={String.raw`\beta_1`} /> means the curve is
+          nearly flat.
         </p>
         <p>
           Drag the curve below to feel it: grab the middle to slide the whole
@@ -240,31 +251,19 @@ export default function LogisticExplainer() {
         <div className="formula-grid" style={{ marginTop: 18 }}>
           <div className="formula-card user">
             <div className="formula-label">Your curve</div>
-            <span className="equation">
-              <span className="lhs">P({dataset.positiveLabel})</span>
-              <span className="op">=</span>
-              <span className="op">σ(</span>
-              <span className="param">{curve.beta0.toFixed(2)}</span>
-              <span className="op">+</span>
-              <span className="param">{curve.beta1.toFixed(3)}</span>
-              <span className="op">×</span>
-              <span className="var">{dataset.xShort}</span>
-              <span className="op">)</span>
-            </span>
+            <div className="formula-equation">
+              <InlineMath
+                math={String.raw`P(\text{${dataset.positiveLabel}}) = \sigma\!\left(${curve.beta0.toFixed(2)} ${curve.beta1 >= 0 ? '+' : '-'} ${Math.abs(curve.beta1).toFixed(3)}\,${asMathLabel(dataset.xShort)}\right)`}
+              />
+            </div>
           </div>
           <div className="formula-card best">
             <div className="formula-label">Maximum-likelihood fit</div>
-            <span className="equation">
-              <span className="lhs">P({dataset.positiveLabel})</span>
-              <span className="op">=</span>
-              <span className="op">σ(</span>
-              <span className="param">{fit.beta0.toFixed(2)}</span>
-              <span className="op">+</span>
-              <span className="param">{fit.beta1.toFixed(3)}</span>
-              <span className="op">×</span>
-              <span className="var">{dataset.xShort}</span>
-              <span className="op">)</span>
-            </span>
+            <div className="formula-equation">
+              <InlineMath
+                math={String.raw`P(\text{${dataset.positiveLabel}}) = \sigma\!\left(${fit.beta0.toFixed(2)} ${fit.beta1 >= 0 ? '+' : '-'} ${Math.abs(fit.beta1).toFixed(3)}\,${asMathLabel(dataset.xShort)}\right)`}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -276,18 +275,20 @@ export default function LogisticExplainer() {
           Logistic regression uses the <strong>log-loss</strong> (or
           cross-entropy):
         </p>
-        <p className="eq-block">
-          L(β) = − (1/n) · Σ [ y<sub>i</sub> · log(p<sub>i</sub>) +
-          (1 − y<sub>i</sub>) · log(1 − p<sub>i</sub>) ]
-        </p>
+        <BlockMath
+          math={String.raw`\mathcal{L}(\beta) \;=\; -\frac{1}{n}\sum_{i=1}^{n}\Bigl[\,y_i \log(p_i) + (1 - y_i)\log(1 - p_i)\,\Bigr]`}
+        />
         <p>
-          Reading it patient by patient: if the truth is y = 1, the loss is{' '}
-          <span className="eq">−log(p)</span> — a heavy penalty when p is
-          close to 0. If the truth is y = 0, the loss is{' '}
-          <span className="eq">−log(1 − p)</span> — a heavy penalty when p is
-          close to 1. The model is rewarded for confident correct predictions
-          and punished sharply for confident wrong ones — clinically what we
-          want from a probability estimate.
+          Reading it patient by patient: if the truth is{' '}
+          <InlineMath math={String.raw`y = 1`} />, the loss is{' '}
+          <InlineMath math={String.raw`-\log(p)`} /> — a heavy penalty when{' '}
+          <InlineMath math={String.raw`p`} /> is close to 0. If the truth is{' '}
+          <InlineMath math={String.raw`y = 0`} />, the loss is{' '}
+          <InlineMath math={String.raw`-\log(1 - p)`} /> — a heavy penalty
+          when <InlineMath math={String.raw`p`} /> is close to 1. The model
+          is rewarded for confident correct predictions and punished sharply
+          for confident wrong ones — clinically what we want from a
+          probability estimate.
         </p>
         <div className="loss-row" style={{ marginTop: 12 }}>
           <div className="metric-col user" style={{ minWidth: 240 }}>
@@ -317,11 +318,15 @@ export default function LogisticExplainer() {
         <h2>Walk through one prediction</h2>
         <p>
           Pick three patients from the cohort and trace the calculation. Each
-          one starts as an <span className="eq">{dataset.xShort}</span>{' '}
-          value, becomes a linear score{' '}
-          <span className="eq">z = β₀ + β₁·{dataset.xShort}</span>, and then a
-          probability via the sigmoid. The decision step compares P to the
-          threshold (default 0.50).
+          one starts as an{' '}
+          <InlineMath math={asMathLabel(dataset.xShort)} /> value, becomes a
+          linear score{' '}
+          <InlineMath
+            math={String.raw`z = \beta_0 + \beta_1 \cdot ${asMathLabel(dataset.xShort)}`}
+          />
+          , and then a probability via the sigmoid{' '}
+          <InlineMath math={String.raw`P = \sigma(z)`} />. The decision step
+          compares P to the threshold (default 0.50).
         </p>
         <LogisticWorkedExample
           points={points}
@@ -410,8 +415,8 @@ export default function LogisticExplainer() {
         <h2>The ROC curve and AUC</h2>
         <p>
           Sweeping the threshold from 1 down to 0 traces a curve through{' '}
-          <span className="eq">(false positive rate, sensitivity)</span>{' '}
-          space — the receiver operating characteristic, or ROC, curve. A
+          <InlineMath math={String.raw`(\text{FPR},\ \text{TPR})`} /> space —
+          the receiver operating characteristic, or ROC, curve. A
           model that doesn't discriminate at all sits on the diagonal; a
           perfect model jumps to the top-left corner. The area under the
           curve (AUC) summarises discrimination across all thresholds.
@@ -452,32 +457,40 @@ export default function LogisticExplainer() {
       <section>
         <h2>Reading the coefficient — odds ratios</h2>
         <p>
-          β₁ in logistic regression has a specific clinical meaning. Recall
-          the form:
+          <InlineMath math={String.raw`\beta_1`} /> in logistic regression has
+          a specific clinical meaning. Recall the form:
         </p>
-        <p className="eq-block">
-          log( P / (1 − P) ) = β₀ + β₁ · {dataset.xShort}
-        </p>
+        <BlockMath
+          math={String.raw`\log\!\left(\dfrac{P}{1 - P}\right) \;=\; \beta_0 + \beta_1 \cdot ${asMathLabel(dataset.xShort)}`}
+        />
         <p>
-          The left-hand side is the <strong>log-odds</strong>. β₁ is therefore
-          the change in log-odds per one-unit increase in{' '}
+          The left-hand side is the <strong>log-odds</strong>.{' '}
+          <InlineMath math={String.raw`\beta_1`} /> is therefore the change in
+          log-odds per one-unit increase in{' '}
           {dataset.xShort.toLowerCase()}. Exponentiating gives the{' '}
           <strong>odds ratio</strong> per unit:
         </p>
         <div className="odds-grid">
           <div className="odds-card">
-            <div className="odds-label">β₁ (log-odds per {dataset.xUnit})</div>
+            <div className="odds-label">
+              <InlineMath math={String.raw`\beta_1`} /> (log-odds per{' '}
+              {dataset.xUnit})
+            </div>
             <div className="odds-value">{fit.beta1.toFixed(3)}</div>
           </div>
           <div className="odds-card">
             <div className="odds-label">odds ratio per {dataset.xUnit}</div>
             <div className="odds-value">{Math.exp(fit.beta1).toFixed(3)}</div>
-            <div className="odds-sub">exp(β₁)</div>
+            <div className="odds-sub">
+              <InlineMath math={String.raw`e^{\beta_1}`} />
+            </div>
           </div>
           <div className="odds-card">
             <div className="odds-label">odds ratio per 10 {dataset.xUnit}</div>
             <div className="odds-value">{Math.exp(fit.beta1 * 10).toFixed(3)}</div>
-            <div className="odds-sub">exp(10·β₁)</div>
+            <div className="odds-sub">
+              <InlineMath math={String.raw`e^{10\,\beta_1}`} />
+            </div>
           </div>
         </div>
         <p className="caption">

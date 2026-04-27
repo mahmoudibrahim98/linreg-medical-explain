@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { InlineMath } from './Math';
 
 const POINT_COLOR = '#1f6feb';
 const LINE_COLOR = '#e07b00';
@@ -210,11 +211,11 @@ export default function WorkedExample({
       <h3 className="worked-title">Walk through the calculation</h3>
       <p className="worked-intro">
         Pick any patient i. The model predicts{' '}
-        <span className="eq">ŷ<sub>i</sub> = m·x<sub>i</sub> + b</span>. The{' '}
-        <strong>error</strong> for that patient is the gap between the actual
-        value y<sub>i</sub> and the prediction. The <strong>squared error</strong>{' '}
-        is the area of one red square. The MSE averages those squared errors
-        across the cohort.
+        <InlineMath math={String.raw`\hat{y}_i = m\,x_i + b`} />. The{' '}
+        <strong>error</strong> for that patient is the gap between the
+        actual value <InlineMath math={String.raw`y_i`} /> and the
+        prediction. The <strong>squared error</strong> is the area of one
+        red square. The MSE averages those squared errors across the cohort.
       </p>
 
       <div className="worked-anatomy-row">
@@ -234,25 +235,21 @@ export default function WorkedExample({
           <ol className="anatomy-steps">
             <li>
               Plug their {xShort.toLowerCase()} into the line:{' '}
-              <span className="eq">
-                ŷ = {fmt(slope, 3)} × {fmt(examples[1].x, 1)} +{' '}
-                {fmt(intercept, 2)} = {fmt(rows[1].yp)}
-              </span>.
+              <InlineMath
+                math={String.raw`\hat{y} = ${fmt(slope, 3)} \cdot ${fmt(examples[1].x, 1)} + ${fmt(intercept, 2)} = ${fmt(rows[1].yp)}`}
+              />.
             </li>
             <li>
               Subtract the prediction from the actual:{' '}
-              <span className="eq">
-                error = {fmt(examples[1].y)} − {fmt(rows[1].yp)} ={' '}
-                {rows[1].err >= 0 ? '+' : ''}
-                {fmt(rows[1].err)}
-              </span>.
+              <InlineMath
+                math={String.raw`\text{error} = ${fmt(examples[1].y)} - ${fmt(rows[1].yp)} = ${rows[1].err >= 0 ? '+' : ''}${fmt(rows[1].err)}`}
+              />.
             </li>
             <li>
               Square it:{' '}
-              <span className="eq">
-                ({rows[1].err >= 0 ? '+' : ''}
-                {fmt(rows[1].err)})² = {fmt(rows[1].sq)}
-              </span>{' '}
+              <InlineMath
+                math={String.raw`(${rows[1].err >= 0 ? '+' : ''}${fmt(rows[1].err)})^2 = ${fmt(rows[1].sq)}`}
+              />{' '}
               (this is the <em>area of the red square</em>).
             </li>
           </ol>
@@ -300,18 +297,15 @@ export default function WorkedExample({
       <div className="worked-mse">
         <div className="worked-mse-line">
           For these 3 patients:{' '}
-          <span className="eq mse-calc">
-            MSE = {fmt(sumSq)} / 3 ={' '}
-            <strong>
-              {fmt(sampleMSE)} {yUnit ? `${yUnit}²` : ''}
-            </strong>
-          </span>
+          <InlineMath
+            math={String.raw`\mathrm{MSE} = \dfrac{${fmt(sumSq)}}{3} = ${fmt(sampleMSE)}${yUnit ? `\\ ${yUnit}^{2}` : ''}`}
+          />
         </div>
         <div className="worked-mse-line full-cohort">
           Across all {points.length} patients in the cohort:{' '}
-          <strong>
-            MSE = {fmt(fullMSE)} {yUnit ? `${yUnit}²` : ''}
-          </strong>
+          <InlineMath
+            math={String.raw`\mathrm{MSE} = ${fmt(fullMSE)}${yUnit ? `\\ ${yUnit}^{2}` : ''}`}
+          />
         </div>
         <p className="worked-foot">
           Drag the line above and watch every cell in this table — and the

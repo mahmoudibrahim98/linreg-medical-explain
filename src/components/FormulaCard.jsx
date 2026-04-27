@@ -1,23 +1,27 @@
+import { InlineMath } from './Math';
+
 function fmt(n, digits = 2) {
-  if (!Number.isFinite(n)) return '—';
+  if (!Number.isFinite(n)) return '?';
   const abs = Math.abs(n);
   if (abs !== 0 && (abs < 0.01 || abs >= 1000)) return n.toExponential(2);
   return n.toFixed(digits);
 }
 
+// Treat single-character labels (e.g. y, x) as italic math identifiers and
+// multi-character labels (BMI, HbA1c, SBP) as text via \mathrm{}.
+function asMathLabel(label) {
+  if (label.length <= 1) return label;
+  return `\\mathrm{${label}}`;
+}
+
 function Equation({ slope, intercept, xShort, yShort }) {
-  const sign = intercept >= 0 ? '+' : '−';
-  return (
-    <span className="equation">
-      <span className="lhs">predicted {yShort}</span>
-      <span className="op">=</span>
-      <span className="param">{fmt(slope, 3)}</span>
-      <span className="op">×</span>
-      <span className="var">{xShort}</span>
-      <span className="op">{sign}</span>
-      <span className="param">{fmt(Math.abs(intercept), 2)}</span>
-    </span>
-  );
+  const sign = intercept >= 0 ? '+' : '-';
+  const absInt = fmt(Math.abs(intercept), 2);
+  const slopeStr = fmt(slope, 3);
+  const yLabel = asMathLabel(yShort);
+  const xLabel = asMathLabel(xShort);
+  const expr = `\\widehat{${yLabel}} = ${slopeStr} \\cdot ${xLabel} ${sign} ${absInt}`;
+  return <InlineMath math={expr} />;
 }
 
 export default function FormulaCard({
@@ -32,21 +36,25 @@ export default function FormulaCard({
     <div className="formula-grid">
       <div className="formula-card user">
         <div className="formula-label">Your line</div>
-        <Equation
-          slope={userSlope}
-          intercept={userIntercept}
-          xShort={xShort}
-          yShort={yShort}
-        />
+        <div className="formula-equation">
+          <Equation
+            slope={userSlope}
+            intercept={userIntercept}
+            xShort={xShort}
+            yShort={yShort}
+          />
+        </div>
       </div>
       <div className="formula-card best">
         <div className="formula-label">Least-squares fit</div>
-        <Equation
-          slope={bestSlope}
-          intercept={bestIntercept}
-          xShort={xShort}
-          yShort={yShort}
-        />
+        <div className="formula-equation">
+          <Equation
+            slope={bestSlope}
+            intercept={bestIntercept}
+            xShort={xShort}
+            yShort={yShort}
+          />
+        </div>
       </div>
     </div>
   );

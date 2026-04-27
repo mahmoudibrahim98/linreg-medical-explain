@@ -15,6 +15,7 @@ import LossSurface from '../components/LossSurface';
 import FormulaCard from '../components/FormulaCard';
 import NonlinearPlot from '../components/NonlinearPlot';
 import WorkedExample from '../components/WorkedExample';
+import { InlineMath, BlockMath } from '../components/Math';
 
 const POLY_DEGREES = [1, 2, 3, 4, 5];
 
@@ -129,8 +130,8 @@ export default function LinearExplainer() {
         </p>
         <p>
           The simplest model is a straight line:{' '}
-          <span className="eq">ŷ = m · x + b</span>. One input, one output, two
-          knobs to turn. Despite its simplicity, this model embodies every
+          <InlineMath math={String.raw`\hat{y} = m \cdot x + b`} />. One
+          input, one output, two knobs to turn. Despite its simplicity, this model embodies every
           ingredient of modern machine learning: a parameterised function, a
           measure of error, and a procedure to find the parameters that
           minimise that error.
@@ -334,18 +335,16 @@ export default function LinearExplainer() {
         <h2>How do we measure how good a line is?</h2>
         <p className="prose">
           For each patient i with observed value{' '}
-          <span className="eq">y<sub>i</sub></span> and predicted value{' '}
-          <span className="eq">ŷ<sub>i</sub> = m·x<sub>i</sub> + b</span>, the
+          <InlineMath math={String.raw`y_i`} /> and predicted value{' '}
+          <InlineMath math={String.raw`\hat{y}_i = m\,x_i + b`} />, the
           residual is the gap{' '}
-          <span className="eq">y<sub>i</sub> − ŷ<sub>i</sub></span> — exactly
-          the red segments above. Turn on <em>error squares</em> and you'll see
-          a square of side equal to that gap drawn next to each patient. The
+          <InlineMath math={String.raw`y_i - \hat{y}_i`} /> — exactly the red
+          segments above. Turn on <em>error squares</em> and you'll see a
+          square of side equal to that gap drawn next to each patient. The
           area of each square is the residual squared; the average area is the{' '}
           <strong>mean squared error</strong>:
         </p>
-        <p className="eq-block">
-          MSE(m, b) = (1/n) · Σ (y<sub>i</sub> − m·x<sub>i</sub> − b)²
-        </p>
+        <BlockMath math={String.raw`\mathrm{MSE}(m,\,b) \;=\; \frac{1}{n}\sum_{i=1}^{n}\bigl(y_i - m\,x_i - b\bigr)^2`} />
 
         <WorkedExample
           points={points}
@@ -416,15 +415,16 @@ export default function LinearExplainer() {
           rescales it. It answers: of all the variance in the outcome, what{' '}
           <em>fraction</em> does our line explain?
         </p>
-        <p className="eq-block">
-          R² = 1 − SS<sub>res</sub> / SS<sub>tot</sub>
-        </p>
+        <BlockMath math={String.raw`R^2 \;=\; 1 - \frac{SS_{\text{res}}}{SS_{\text{tot}}} \;=\; 1 - \frac{\sum_i (y_i - \hat{y}_i)^2}{\sum_i (y_i - \bar{y})^2}`} />
         <p className="prose">
-          <code>SS_res</code> is the sum of squared residuals around your line.
-          <code>SS_tot</code> is the sum of squared deviations of the y values
-          around their mean — i.e., what you'd get from a "constant model" that
-          ignores x. R² ranges from 1 (perfect fit) to 0 (no better than the
-          mean) and can even go negative for a sufficiently bad line.
+          <InlineMath math={String.raw`SS_{\text{res}}`} /> is the sum of
+          squared residuals around your line.{' '}
+          <InlineMath math={String.raw`SS_{\text{tot}}`} /> is the sum of
+          squared deviations of the y values around their mean{' '}
+          <InlineMath math={String.raw`\bar{y}`} /> — i.e., what you'd get
+          from a "constant model" that ignores x. R² ranges from 1 (perfect
+          fit) to 0 (no better than the mean) and can even go negative for a
+          sufficiently bad line.
         </p>
         <p className="prose">
           <strong>Clinical reading.</strong> An R² of {bestR2.toFixed(2)} for

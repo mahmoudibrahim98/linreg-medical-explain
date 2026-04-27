@@ -1,5 +1,11 @@
 import { useMemo } from 'react';
 import { sigmoid } from '../stats/regression';
+import { InlineMath } from './Math';
+
+function asMathLabel(label) {
+  if (!label) return '';
+  return label.length <= 1 ? label : `\\mathrm{${label}}`;
+}
 
 function fmt(n, digits = 3) {
   if (!Number.isFinite(n)) return '—';
@@ -41,9 +47,13 @@ export default function LogisticWorkedExample({
       <h3 className="worked-title">Walk through the calculation</h3>
       <p className="worked-intro">
         For each patient, the model computes a linear combination{' '}
-        <span className="eq">z = β₀ + β₁·{xShort}</span>, passes it through
-        the logistic σ to get a probability, and compares that probability to
-        the chosen threshold to make a decision.
+        <InlineMath
+          math={String.raw`z = \beta_0 + \beta_1 \cdot ${asMathLabel(xShort)}`}
+        />
+        , passes it through the logistic{' '}
+        <InlineMath math={String.raw`\sigma`} /> to get a probability{' '}
+        <InlineMath math={String.raw`P = \sigma(z)`} />, and compares that
+        probability to the chosen threshold to make a decision.
       </p>
 
       <div className="worked-table-wrap">
@@ -52,8 +62,12 @@ export default function LogisticWorkedExample({
             <tr>
               <th></th>
               <th>{xShort}</th>
-              <th>z = β₀ + β₁·x</th>
-              <th>P = σ(z)</th>
+              <th>
+                <InlineMath math={String.raw`z = \beta_0 + \beta_1 x`} />
+              </th>
+              <th>
+                <InlineMath math={String.raw`P = \sigma(z)`} />
+              </th>
               <th>decision (t={threshold.toFixed(2)})</th>
               <th>actual</th>
               <th>correct?</th>
@@ -95,16 +109,14 @@ export default function LogisticWorkedExample({
       <div className="worked-mse">
         <div className="worked-mse-line">
           For patient P2:{' '}
-          <span className="eq mse-calc">
-            z = {fmt(beta0, 3)} + {fmt(beta1, 4)} × {fmt(rows[1].p.x, 1)} ={' '}
-            {fmt(rows[1].z, 3)}
-          </span>
+          <InlineMath
+            math={String.raw`z = ${fmt(beta0, 3)} ${beta1 >= 0 ? '+' : '-'} ${fmt(Math.abs(beta1), 4)} \cdot ${fmt(rows[1].p.x, 1)} = ${fmt(rows[1].z, 3)}`}
+          />
         </div>
         <div className="worked-mse-line">
-          <span className="eq mse-calc">
-            P = σ({fmt(rows[1].z, 3)}) = 1 / (1 + exp(−{fmt(rows[1].z, 3)})) ={' '}
-            <strong>{fmt(rows[1].prob, 3)}</strong>
-          </span>
+          <InlineMath
+            math={String.raw`P = \sigma(${fmt(rows[1].z, 3)}) = \dfrac{1}{1 + e^{-(${fmt(rows[1].z, 3)})}} = ${fmt(rows[1].prob, 3)}`}
+          />
         </div>
         <div className="worked-mse-line full-cohort">
           {rows[1].prob >= threshold ? '≥' : '<'} threshold (
