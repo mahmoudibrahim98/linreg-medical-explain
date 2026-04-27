@@ -32,6 +32,10 @@ export default function LogisticPlot({
   showUserCurve = true,
   threshold,
   showThreshold = false,
+  predictionMode = false,
+  predictX,
+  onPredictXChange,
+  predictWith = 'user', // 'user' or 'fit'
   xLabel,
   yLabel,
   xRange,
@@ -50,13 +54,18 @@ export default function LogisticPlot({
     showUserCurve,
     fit,
     linearFit,
+    predictionMode,
+    predictX,
+    predictWith,
   });
   const elemsRef = useRef({});
   const onChangeRef = useRef(onCurveChange);
+  const onPredictXChangeRef = useRef(onPredictXChange);
 
   useEffect(() => {
     onChangeRef.current = onCurveChange;
-  }, [onCurveChange]);
+    onPredictXChangeRef.current = onPredictXChange;
+  }, [onCurveChange, onPredictXChange]);
 
   // Structural setup
   useEffect(() => {
@@ -141,6 +150,10 @@ export default function LogisticPlot({
     const fitG = root.append('g').attr('class', 'fit-layer');
     const userG = root.append('g').attr('class', 'user-curve-layer');
     const thresholdG = root.append('g').attr('class', 'threshold-layer');
+    const predictionG = root
+      .append('g')
+      .attr('class', 'prediction-layer')
+      .style('display', 'none');
     const pointsG = root.append('g').attr('class', 'points-layer');
 
     // Outcome row labels at right
@@ -250,6 +263,45 @@ export default function LogisticPlot({
       .attr('text-anchor', 'middle')
       .style('display', 'none');
 
+    // Prediction overlay: dashed guides from the chosen x to the curve and
+    // across to the y-axis, plus a draggable marker on the curve.
+    const PRED = '#7c3aed';
+    const predGuideV = predictionG
+      .append('line')
+      .attr('stroke', PRED)
+      .attr('stroke-dasharray', '4 4')
+      .attr('stroke-width', 1.5);
+    const predGuideH = predictionG
+      .append('line')
+      .attr('stroke', PRED)
+      .attr('stroke-dasharray', '4 4')
+      .attr('stroke-width', 1.5);
+    const predTickX = predictionG
+      .append('line')
+      .attr('stroke', PRED)
+      .attr('stroke-width', 2);
+    const predTickY = predictionG
+      .append('line')
+      .attr('stroke', PRED)
+      .attr('stroke-width', 2);
+    const predLabelX = predictionG
+      .append('text')
+      .attr('class', 'pred-label')
+      .attr('text-anchor', 'middle')
+      .attr('fill', PRED);
+    const predLabelY = predictionG
+      .append('text')
+      .attr('class', 'pred-label')
+      .attr('text-anchor', 'end')
+      .attr('fill', PRED);
+    const predMarker = predictionG
+      .append('circle')
+      .attr('r', 7)
+      .attr('fill', PRED)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 2)
+      .attr('cursor', 'ew-resize');
+
     function updateUserCurve() {
       const { showUserCurve: shown, curve: c } = stateRef.current;
       if (!shown) {
@@ -279,6 +331,8 @@ export default function LogisticPlot({
       handleM
         .attr('cx', xScale(midX))
         .attr('cy', yScale(sigmoid(beta0 + beta1 * midX)));
+      // Keep the prediction marker stuck to the curve as it moves.
+      if (stateRef.current.predictWith !== 'fit') updatePrediction();
     }
 
     function updateFitCurve() {
@@ -290,6 +344,7 @@ export default function LogisticPlot({
       fitPath
         .style('display', null)
         .attr('d', curvePath((x) => sigmoid(f.beta0 + f.beta1 * x), xRange, xScale, yScale));
+      if (stateRef.current.predictWith === 'fit') updatePrediction();
     }
 
     function updateLinear() {
@@ -306,6 +361,40 @@ export default function LogisticPlot({
         .attr('x2', xScale(x2))
         .attr('y1', yScale(lf.slope * x1 + lf.intercept))
         .attr('y2', yScale(lf.slope * x2 + lf.intercept));
+    }
+
+    function updatePrediction() {
+      const {
+        predictionMode: shown,
+        predictX: xv,
+        predictWith,
+        curve: c,
+        fit: f,
+      } = stateRef.current;
+      if (!shown || xv === undefined || xv === null) {
+        predictionG.style('display', 'none');
+        return;
+      }
+      const params = predictWith === 'fit' && f ? f : c;
+      const xClamped = Math.max(xRange[0], Math.min(xRange[1], xv));
+      const z = params.beta0 + params.beta1 * xClamped;
+      const p = sigmoid(z);
+      const px = xScale(xClamped);
+      const py = yScale(p);
+      predictionG.style('display', null);
+      predGuideV.attr('x1', px).attr('x2', px).attr('y1', py).attr('y2', innerH);
+      predGuideH.attr('x1', 0).attr('x2', px).attr('y1', py).attr('y2', py);
+      predTickX.attr('x1', px).attr('x2', px).attr('y1', innerH).attr('y2', innerH + 6);
+      predTickY.attr('x1', -6).attr('x2', 0).attr('y1', py).attr('y2', py);
+      predMarker.attr('cx', px).attr('cy', py);
+      predLabelX
+        .attr('x', px)
+        .attr('y', innerH + 22)
+        .text(xClamped.toFixed(1));
+      predLabelY
+        .attr('x', -8)
+        .attr('y', py + 4)
+        .text(p.toFixed(2));
     }
 
     function updateThreshold() {
@@ -405,6 +494,19 @@ export default function LogisticPlot({
         })
     );
 
+    // Drag the prediction marker horizontally to scrub through x.
+    predMarker.call(
+      d3.drag().on('drag', (event) => {
+        const newX = Math.max(
+          xRange[0],
+          Math.min(xRange[1], xScale.invert(event.x))
+        );
+        stateRef.current = { ...stateRef.current, predictX: newX };
+        onPredictXChangeRef.current?.(newX);
+        updatePrediction();
+      })
+    );
+
     elemsRef.current = {
       xScale,
       yScale,
@@ -412,12 +514,14 @@ export default function LogisticPlot({
       updateFitCurve,
       updateLinear,
       updateThreshold,
+      updatePrediction,
     };
 
     updateUserCurve();
     updateFitCurve();
     updateLinear();
     updateThreshold();
+    updatePrediction();
   }, [points, xLabel, yLabel, xRange, width, height]);
 
   // Update on prop changes — keep stateRef in sync so the imperative update
@@ -447,6 +551,16 @@ export default function LogisticPlot({
     stateRef.current = { ...stateRef.current, showThreshold, threshold };
     elemsRef.current.updateThreshold?.();
   }, [showThreshold, threshold]);
+
+  useEffect(() => {
+    stateRef.current = {
+      ...stateRef.current,
+      predictionMode,
+      predictX,
+      predictWith,
+    };
+    elemsRef.current.updatePrediction?.();
+  }, [predictionMode, predictX, predictWith]);
 
   return <svg ref={svgRef} width={width} height={height} className="scatter-svg" />;
 }

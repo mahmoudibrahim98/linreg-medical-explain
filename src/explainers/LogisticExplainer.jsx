@@ -51,6 +51,14 @@ export default function LogisticExplainer() {
   const [showFit, setShowFit] = useState(false);
   const [showLinear, setShowLinear] = useState(false);
   const [threshold, setThreshold] = useState(0.5);
+  const [predictionMode, setPredictionMode] = useState(false);
+  const [predictX, setPredictX] = useState(
+    () => (dataset.xRange[0] + dataset.xRange[1]) / 2
+  );
+  useEffect(() => {
+    setPredictX((dataset.xRange[0] + dataset.xRange[1]) / 2);
+    setPredictionMode(false);
+  }, [datasetId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const userPredict = (x) => sigmoid(curve.beta0 + curve.beta1 * x);
   const bestPredict = (x) => sigmoid(fit.beta0 + fit.beta1 * x);
@@ -201,6 +209,10 @@ export default function LogisticExplainer() {
           showFit={showFit}
           showLinear={false}
           showUserCurve={true}
+          predictionMode={predictionMode}
+          predictX={predictX}
+          onPredictXChange={setPredictX}
+          predictWith="user"
           xLabel={dataset.xLabel}
           yLabel={dataset.yLabel}
           xRange={dataset.xRange}
@@ -215,6 +227,14 @@ export default function LogisticExplainer() {
               onChange={(e) => setShowFit(e.target.checked)}
             />
             <span className="swatch swatch-best" /> Show maximum-likelihood fit
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={predictionMode}
+              onChange={(e) => setPredictionMode(e.target.checked)}
+            />
+            <span className="swatch swatch-pred" /> Make a prediction
           </label>
           <div className="control-actions">
             <button
@@ -289,6 +309,52 @@ export default function LogisticExplainer() {
             n = {sampleSize} patient{sampleSize === 1 ? '' : 's'}
           </span>
         </div>
+
+        {predictionMode && (
+          <div className="prediction-panel">
+            <div className="prediction-header">
+              Predict for a hypothetical patient
+            </div>
+            <div className="prediction-slider-row">
+              <label htmlFor="logistic-predict-x">{dataset.xShort}:</label>
+              <input
+                id="logistic-predict-x"
+                type="range"
+                min={dataset.xRange[0]}
+                max={dataset.xRange[1]}
+                step={(dataset.xRange[1] - dataset.xRange[0]) / 200}
+                value={predictX}
+                onChange={(e) => setPredictX(parseFloat(e.target.value))}
+              />
+              <span className="prediction-x-readout">
+                {predictX.toFixed(1)} {dataset.xUnit}
+              </span>
+            </div>
+            <div className="prediction-equation">
+              <InlineMath
+                math={String.raw`z = ${curve.beta0.toFixed(2)} ${curve.beta1 >= 0 ? '+' : '-'} ${Math.abs(curve.beta1).toFixed(3)} \cdot ${predictX.toFixed(1)} = ${(curve.beta0 + curve.beta1 * predictX).toFixed(3)}`}
+              />
+            </div>
+            <div className="prediction-equation">
+              <InlineMath
+                math={String.raw`P(\text{${dataset.positiveLabel}}) = \sigma(${(curve.beta0 + curve.beta1 * predictX).toFixed(3)}) = \mathbf{${sigmoid(curve.beta0 + curve.beta1 * predictX).toFixed(3)}}`}
+              />
+            </div>
+            <p className="prediction-note">
+              Your current curve says a patient with{' '}
+              {dataset.xShort.toLowerCase()} = {predictX.toFixed(1)}{' '}
+              {dataset.xUnit} has about a{' '}
+              <strong>
+                {(sigmoid(curve.beta0 + curve.beta1 * predictX) * 100).toFixed(0)}
+                %
+              </strong>{' '}
+              chance of being {dataset.positiveLabel}. Drag the purple dot on
+              the curve or move the slider to explore other patients. Whether
+              that probability translates into a yes/no decision is the
+              subject of section 06.
+            </p>
+          </div>
+        )}
 
         <div className="formula-grid" style={{ marginTop: 18 }}>
           <div className="formula-card user">
