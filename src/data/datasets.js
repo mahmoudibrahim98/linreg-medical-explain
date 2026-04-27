@@ -142,3 +142,80 @@ export const datasets = [
 export function generateDataset(dataset, seed) {
   return dataset.sample(seed);
 }
+
+// Nonlinear scenarios — used in the section that shows the limits of a
+// straight-line model. Each carries a `truthFn` so we can overlay the true
+// generating curve against the fitted polynomial.
+export const nonlinearDatasets = [
+  {
+    id: 'dose-emax',
+    label: 'Drug dose → response (Hill / saturation)',
+    short: 'Saturating dose-response',
+    description:
+      'When we extend the dose range beyond the early-phase window, the response curve saturates: each extra mg gives less benefit because receptors and transporters fill up. The true relationship follows an Emax (Hill) curve, not a line.',
+    clinicalNote:
+      'Receptor saturation, transporter saturation, and side-effect ceilings all flatten dose-response. Extrapolating a linear fit from the early-phase range to higher doses would predict implausible super-additive effects.',
+    xLabel: 'Dose (mg)',
+    yLabel: 'Response (% of max)',
+    xShort: 'Dose',
+    yShort: 'Response',
+    xUnit: 'mg',
+    yUnit: '%',
+    xRange: [0, 250],
+    yRange: [-5, 110],
+    n: 90,
+    truthLabel: 'Emax · dose / (EC50 + dose),  EC50 = 30 mg',
+    truthFn(x) {
+      const Emax = 100;
+      const EC50 = 30;
+      return (Emax * x) / (EC50 + x);
+    },
+    sample(seed) {
+      const rng = mulberry32(seed);
+      const sigma = 5.5;
+      const pts = [];
+      for (let i = 0; i < this.n; i++) {
+        const x = uniform(rng, 0, 240);
+        const y = this.truthFn(x) + gaussian(rng) * sigma;
+        pts.push({ x, y });
+      }
+      return pts;
+    },
+  },
+  {
+    id: 'bmi-mortality',
+    label: 'BMI → mortality hazard (J-curve)',
+    short: 'BMI vs. mortality',
+    description:
+      'Population epidemiology consistently shows a J-shaped relationship: 10-year mortality is lowest in a middle BMI range and rises at both extremes. A straight line cannot describe both tails at once.',
+    clinicalNote:
+      'The minimum-mortality BMI shifts with age, smoking status, and baseline disease, but the J-curve persists. A linear model here systematically underestimates risk at the underweight end.',
+    xLabel: 'BMI (kg/m²)',
+    yLabel: '10-yr mortality hazard ratio',
+    xShort: 'BMI',
+    yShort: 'Hazard',
+    xUnit: 'kg/m²',
+    yUnit: '',
+    xRange: [16, 45],
+    yRange: [0.4, 5.5],
+    n: 100,
+    truthLabel: 'asymmetric J-curve, minimum near BMI ≈ 23',
+    truthFn(x) {
+      const center = 23;
+      const sq = (x - center) * (x - center);
+      const tail = Math.max(0, x - 28);
+      return 1 + 0.012 * sq + 0.00018 * tail * tail * tail;
+    },
+    sample(seed) {
+      const rng = mulberry32(seed);
+      const sigma = 0.32;
+      const pts = [];
+      for (let i = 0; i < this.n; i++) {
+        const x = uniform(rng, 17, 43);
+        const y = this.truthFn(x) + gaussian(rng) * sigma;
+        pts.push({ x, y: Math.max(0.35, y) });
+      }
+      return pts;
+    },
+  },
+];

@@ -1,11 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
-import { datasets, generateDataset } from './data/datasets';
-import { fitOLS, mse, r2 } from './stats/regression';
+import { datasets, generateDataset, nonlinearDatasets } from './data/datasets';
+import {
+  fitOLS,
+  mse,
+  r2,
+  fitPolynomial,
+  msePredict,
+  r2Predict,
+} from './stats/regression';
 import DatasetPicker from './components/DatasetPicker';
 import ScatterPlot from './components/ScatterPlot';
 import MetricsPanel from './components/MetricsPanel';
 import LossSurface from './components/LossSurface';
 import FormulaCard from './components/FormulaCard';
+import NonlinearPlot from './components/NonlinearPlot';
+
+const POLY_DEGREES = [1, 2, 3, 4, 5];
 
 function defaultStartLine(dataset) {
   const mid = (dataset.yRange[0] + dataset.yRange[1]) / 2;
@@ -50,6 +60,41 @@ export default function App() {
   const [showSquares, setShowSquares] = useState(false);
   const [showBest, setShowBest] = useState(false);
   const [predictionMode, setPredictionMode] = useState(false);
+
+  // Nonlinear section state
+  const [nlDatasetId, setNlDatasetId] = useState(nonlinearDatasets[0].id);
+  const nlDataset = nonlinearDatasets.find((d) => d.id === nlDatasetId);
+  const [nlSeed, setNlSeed] = useState(7);
+  const nlPoints = useMemo(
+    () => nlDataset.sample(nlSeed),
+    [nlDataset, nlSeed]
+  );
+  const linearFit = useMemo(() => fitOLS(nlPoints), [nlPoints]);
+  const polyFits = useMemo(
+    () => POLY_DEGREES.map((d) => fitPolynomial(nlPoints, d)),
+    [nlPoints]
+  );
+  const polyMSEs = useMemo(
+    () => polyFits.map((f) => msePredict(nlPoints, (x) => f.predict(x))),
+    [polyFits, nlPoints]
+  );
+  const polyR2s = useMemo(
+    () => polyFits.map((f) => r2Predict(nlPoints, (x) => f.predict(x))),
+    [polyFits, nlPoints]
+  );
+  const [polyDegree, setPolyDegree] = useState(1);
+  const [showTruth, setShowTruth] = useState(true);
+  const polyFit = polyFits[polyDegree - 1];
+  // Fix the residuals-plot y-axis to the linear-fit residuals so higher-degree
+  // residuals visibly shrink instead of auto-rescaling to fill the panel.
+  const linearResidualMaxAbs = useMemo(() => {
+    let m = 0;
+    for (const p of nlPoints) {
+      const r = Math.abs(p.y - (linearFit.slope * p.x + linearFit.intercept));
+      if (r > m) m = r;
+    }
+    return m * 1.1;
+  }, [nlPoints, linearFit]);
 
   const userMSE = mse(points, line.slope, line.intercept);
   const bestMSE = mse(points, best.slope, best.intercept);
@@ -361,7 +406,133 @@ export default function App() {
       </section>
 
       <section>
-        <h2>6 · Cautions for clinical use</h2>
+        <h2>6 · When the line breaks — nonlinear relationships</h2>
+        <p className="prose">
+          Linear regression is a <em>hypothesis</em> about the world: that the
+          outcome changes by the same amount for every unit of input. Plenty
+          of clinical relationships violate that — receptors saturate, risk
+          curves bend, biology has thresholds. Pick a scenario below and watch
+          how a straight line struggles, while a polynomial of higher degree
+          can recover the shape. The mini chart underneath plots the{' '}
+          <em>residuals</em> — when the model is wrong in a structured way,
+          you can see it directly.
+        </p>
+
+        <DatasetPicker
+          datasets={nonlinearDatasets}
+          value={nlDatasetId}
+          onChange={setNlDatasetId}
+        />
+        <p className="dataset-desc">{nlDataset.description}</p>
+        <p className="clinical-note">
+          <strong>Clinical caveat:</strong> {nlDataset.clinicalNote}
+        </p>
+
+        <div className="degree-controls">
+          <span className="control-group-label">Model:</span>
+          <div className="degree-buttons">
+            {POLY_DEGREES.map((d) => (
+              <button
+                key={d}
+                className={`degree-btn${polyDegree === d ? ' active' : ''}`}
+                onClick={() => setPolyDegree(d)}
+                title={d === 1 ? 'Linear (degree 1)' : `Polynomial degree ${d}`}
+              >
+                {d === 1 ? 'linear' : `deg ${d}`}
+              </button>
+            ))}
+          </div>
+          <label className="truth-toggle">
+            <input
+              type="checkbox"
+              checked={showTruth}
+              onChange={(e) => setShowTruth(e.target.checked)}
+            />
+            <span className="swatch swatch-truth" /> Show true curve
+          </label>
+          <button
+            className="btn"
+            onClick={() => setNlSeed((s) => s + 1)}
+            style={{ marginLeft: 'auto' }}
+          >
+            New sample
+          </button>
+        </div>
+
+        <NonlinearPlot
+          points={nlPoints}
+          linearFit={linearFit}
+          polyFit={polyFit}
+          truthFn={nlDataset.truthFn}
+          showTruth={showTruth}
+          residualMaxAbs={linearResidualMaxAbs}
+          xLabel={nlDataset.xLabel}
+          yLabel={nlDataset.yLabel}
+          xRange={nlDataset.xRange}
+          yRange={nlDataset.yRange}
+        />
+
+        <div className="degree-summary">
+          <div className="degree-summary-row">
+            <span className="degree-summary-label">MSE by degree</span>
+            {polyMSEs.map((m, i) => (
+              <span
+                key={i}
+                className={`degree-summary-cell${
+                  polyDegree === i + 1 ? ' active' : ''
+                }`}
+              >
+                <span className="cell-d">d={i + 1}</span>
+                <span className="cell-v">{m.toFixed(2)}</span>
+              </span>
+            ))}
+          </div>
+          <div className="degree-summary-row">
+            <span className="degree-summary-label">R² by degree</span>
+            {polyR2s.map((v, i) => (
+              <span
+                key={i}
+                className={`degree-summary-cell${
+                  polyDegree === i + 1 ? ' active' : ''
+                }`}
+              >
+                <span className="cell-d">d={i + 1}</span>
+                <span className="cell-v">{v.toFixed(3)}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <p className="prose">
+          <strong>What to look for.</strong> At degree 1 the residuals form an
+          unmistakable shape — a U for the J-curve, a wave for the saturation
+          curve. That's the diagnostic signature of model misspecification:
+          the model is wrong in a way the data is telling you about. Bumping
+          the degree to 2 or 3 typically wipes out most of the structure.
+          Going further (degree 4–5) gives only marginal gains here and starts
+          to chase noise — the beginning of <em>overfitting</em>.
+        </p>
+        <p className="prose">
+          <strong>Why this matters.</strong> The same logic underlies the
+          choice of model in modern ML: more flexibility fits the data better,
+          but past a point you're memorising patient-specific noise that won't
+          repeat in new patients. The whole field of <em>regularisation</em>{' '}
+          and <em>cross-validation</em> exists to navigate this trade-off
+          rigorously. Linear regression is the simplest place to feel the
+          tension.
+        </p>
+        <p className="prose">
+          <strong>Note on transformations.</strong> When you know the shape in
+          advance — saturation, exponential decay, a ratio — fitting a model
+          that <em>matches</em> that shape (Hill equation, log-linear,
+          piecewise) usually beats throwing higher polynomial degrees at it.
+          Polynomials wiggle outside the data range; structured models
+          extrapolate sensibly.
+        </p>
+      </section>
+
+      <section>
+        <h2>7 · Cautions for clinical use</h2>
         <ul className="caveats">
           <li>
             <strong>Correlation isn't causation.</strong> A line through BMI
