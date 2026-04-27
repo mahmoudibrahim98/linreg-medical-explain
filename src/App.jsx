@@ -14,6 +14,7 @@ import MetricsPanel from './components/MetricsPanel';
 import LossSurface from './components/LossSurface';
 import FormulaCard from './components/FormulaCard';
 import NonlinearPlot from './components/NonlinearPlot';
+import WorkedExample from './components/WorkedExample';
 
 const POLY_DEGREES = [1, 2, 3, 4, 5];
 
@@ -345,6 +346,18 @@ export default function App() {
         <p className="eq-block">
           MSE(m, b) = (1/n) · Σ (y<sub>i</sub> − m·x<sub>i</sub> − b)²
         </p>
+
+        <WorkedExample
+          points={points}
+          slope={line.slope}
+          intercept={line.intercept}
+          fullMSE={userMSE}
+          xShort={dataset.xShort}
+          yShort={dataset.yShort}
+          xUnit={dataset.xUnit}
+          yUnit={dataset.yUnit}
+        />
+
         <p className="prose">
           Least-squares regression literally finds the (m, b) that makes the
           total area of those squares as small as possible. Why{' '}
