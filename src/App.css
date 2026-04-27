@@ -1637,6 +1637,156 @@ code {
   color: #1f6feb;
 }
 
+/* Decision-tree page ------------------------------------------------------ */
+.tree-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 12px 0 12px;
+}
+
+.tree-row > * {
+  flex: 1 1 380px;
+  min-width: 320px;
+}
+
+.tree-row .scatter-svg {
+  width: 100%;
+  height: auto;
+  max-width: 560px;
+}
+
+.tree-svg .tree-node-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--ink-soft);
+}
+
+.tree-svg .tree-node-text.tree-node-title {
+  font-weight: 700;
+  fill: var(--ink);
+  font-size: 11.5px;
+  font-family: var(--font-sans);
+}
+
+.tree-svg .tree-edge-label {
+  font-size: 11px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.scatter-svg .legend-text {
+  font-size: 11.5px;
+  font-weight: 600;
+  fill: var(--ink-soft);
+  font-family: var(--font-sans);
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.tree-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: stretch;
+  margin: 12px 0 8px;
+}
+
+.tree-controls .sample-size-row,
+.tree-controls .depth-row {
+  flex: 1 1 280px;
+  margin-top: 0;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13.5px;
+}
+
+.tree-controls .depth-row input[type='range'] {
+  flex: 1;
+  min-width: 120px;
+  accent-color: #2ca02c;
+}
+
+.depth-readout {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--ink);
+  min-width: 80px;
+  text-align: right;
+}
+
+.tree-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 8px 0 14px;
+}
+
+.tree-stat {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.tree-stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.tree-stat-value {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.overfit-narration {
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+
+.overfit-narration p {
+  margin: 0 0 12px;
+}
+
+.overfit-stats {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+}
+
+.overfit-stats strong {
+  color: var(--ink);
+}
+
+@media (max-width: 700px) {
+  .tree-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Caveats list */
 .caveats {
   margin: 8px 0 0;

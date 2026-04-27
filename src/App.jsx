@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import LinearExplainer from './explainers/LinearExplainer';
 import LogisticExplainer from './explainers/LogisticExplainer';
+import DecisionTreeExplainer from './explainers/DecisionTreeExplainer';
 
 function getRoute() {
   const h = (typeof window !== 'undefined' && window.location.hash) || '';
   if (h.startsWith('#/logistic')) return 'logistic';
+  if (h.startsWith('#/tree')) return 'tree';
   return 'linear';
 }
 
@@ -45,10 +47,19 @@ export default function App() {
             <NavLink href="#/logistic" route="logistic" current={route}>
               Logistic regression
             </NavLink>
+            <NavLink href="#/tree" route="tree" current={route}>
+              Decision trees
+            </NavLink>
           </div>
         </div>
       </nav>
-      {route === 'logistic' ? <LogisticExplainer /> : <LinearExplainer />}
+      {route === 'logistic' ? (
+        <LogisticExplainer />
+      ) : route === 'tree' ? (
+        <DecisionTreeExplainer />
+      ) : (
+        <LinearExplainer />
+      )}
     </div>
   );
 }
