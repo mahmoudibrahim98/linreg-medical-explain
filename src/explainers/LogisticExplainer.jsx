@@ -181,10 +181,15 @@ export default function LogisticExplainer() {
           nearly flat.
         </p>
         <p>
-          Drag the curve below to feel it: grab the middle to slide the whole
-          thing left/right (changes β₀), grab either end to make the
-          transition steeper or shallower (changes β₁). Toggle the maximum-
-          likelihood fit to see what the data is actually asking for.
+          Use the sliders below to set{' '}
+          <InlineMath math={String.raw`\beta_0`} /> (intercept) and{' '}
+          <InlineMath math={String.raw`\beta_1`} /> (slope of the linear
+          score), or drag the orange curve directly: grab the round handle
+          and slide it left/right to shift{' '}
+          <InlineMath math={String.raw`\beta_0`} />, or grab the curve
+          itself and pull up/down to make the transition steeper or
+          shallower. Toggle the maximum-likelihood fit to see what the data
+          is actually asking for.
         </p>
 
         <LogisticPlot
@@ -227,6 +232,43 @@ export default function LogisticExplainer() {
             <button className="btn" onClick={() => setSeed((s) => s + 1)}>
               New sample
             </button>
+          </div>
+        </div>
+
+        <div className="beta-sliders">
+          <div className="beta-slider-row">
+            <label htmlFor="beta0-slider" className="beta-label">
+              <InlineMath math={String.raw`\beta_0`} /> (intercept)
+            </label>
+            <input
+              id="beta0-slider"
+              type="range"
+              min={-15}
+              max={15}
+              step={0.05}
+              value={curve.beta0}
+              onChange={(e) =>
+                setCurve({ ...curve, beta0: parseFloat(e.target.value) })
+              }
+            />
+            <span className="beta-readout">{curve.beta0.toFixed(2)}</span>
+          </div>
+          <div className="beta-slider-row">
+            <label htmlFor="beta1-slider" className="beta-label">
+              <InlineMath math={String.raw`\beta_1`} /> (slope)
+            </label>
+            <input
+              id="beta1-slider"
+              type="range"
+              min={-1}
+              max={1}
+              step={0.005}
+              value={curve.beta1}
+              onChange={(e) =>
+                setCurve({ ...curve, beta1: parseFloat(e.target.value) })
+              }
+            />
+            <span className="beta-readout">{curve.beta1.toFixed(3)}</span>
           </div>
         </div>
 
