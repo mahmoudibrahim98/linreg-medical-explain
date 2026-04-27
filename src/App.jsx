@@ -138,7 +138,7 @@ export default function App() {
       </section>
 
       <section className="picker-section">
-        <h2>1 · Pick a clinical scenario</h2>
+        <h2>Pick a clinical scenario</h2>
         <DatasetPicker
           datasets={datasets}
           value={datasetId}
@@ -156,7 +156,7 @@ export default function App() {
       </section>
 
       <section>
-        <h2>2 · Fit a line by hand</h2>
+        <h2>Fit a line by hand</h2>
         <p className="prose">
           Drag the orange line — grab either endpoint to tilt it, or drag the
           middle to slide it up and down. Toggle <em>residuals</em> to see the
@@ -331,7 +331,7 @@ export default function App() {
       </section>
 
       <section>
-        <h2>3 · How do we measure how good a line is?</h2>
+        <h2>How do we measure how good a line is?</h2>
         <p className="prose">
           For each patient i with observed value{' '}
           <span className="eq">y<sub>i</sub></span> and predicted value{' '}
@@ -371,7 +371,7 @@ export default function App() {
       </section>
 
       <section>
-        <h2>4 · The loss landscape</h2>
+        <h2>The loss landscape</h2>
         <p className="prose">
           Every choice of slope (m) and intercept (b) gives one MSE value. Plot
           MSE over the (m, b) plane and you get a <em>landscape</em>. For
@@ -409,7 +409,7 @@ export default function App() {
       </section>
 
       <section>
-        <h2>5 · How well does the line fit? — R²</h2>
+        <h2>How well does the line fit? — R²</h2>
         <p className="prose">
           MSE has units (mmHg², or %², or VAS-points²) and is hard to compare
           across problems. The <strong>coefficient of determination R²</strong>{' '}
@@ -439,7 +439,7 @@ export default function App() {
       </section>
 
       <section>
-        <h2>6 · When the line breaks — nonlinear relationships</h2>
+        <h2>When the line breaks — nonlinear relationships</h2>
         <p className="prose">
           Linear regression is a <em>hypothesis</em> about the world: that the
           outcome changes by the same amount for every unit of input. Plenty
@@ -586,7 +586,7 @@ export default function App() {
       </section>
 
       <section>
-        <h2>7 · Cautions for clinical use</h2>
+        <h2>Cautions for clinical use</h2>
         <ul className="caveats">
           <li>
             <strong>Correlation isn't causation.</strong> A line through BMI
