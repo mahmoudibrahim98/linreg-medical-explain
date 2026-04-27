@@ -41,7 +41,16 @@ export default function LogisticPlot({
   height = 380,
 }) {
   const svgRef = useRef(null);
-  const stateRef = useRef({ curve });
+  const stateRef = useRef({
+    curve,
+    threshold,
+    showThreshold,
+    showFit,
+    showLinear,
+    showUserCurve,
+    fit,
+    linearFit,
+  });
   const elemsRef = useRef({});
   const onChangeRef = useRef(onCurveChange);
 
@@ -152,7 +161,9 @@ export default function LogisticPlot({
       .attr('fill', NEGATIVE_COLOR)
       .text(`y = 0`);
 
-    // Jitter y for visibility
+    // Jitter y for visibility. Disable pointer events so the points never
+    // intercept clicks meant for the draggable curve underneath.
+    pointsG.style('pointer-events', 'none');
     function plotPoints() {
       pointsG.selectAll('circle').remove();
       const rng = mulberry(42);
@@ -173,19 +184,26 @@ export default function LogisticPlot({
     }
     plotPoints();
 
-    // User curve (orange)
+    // User curve (orange) with a transparent hit path layered on top so
+    // dragging is forgiving even where the visible stroke is thin.
     const userPath = userG
       .append('path')
       .attr('fill', 'none')
       .attr('stroke', CURVE_COLOR)
       .attr('stroke-width', 3)
-      .attr('cursor', 'grab');
+      .attr('pointer-events', 'none');
+    const userHit = userG
+      .append('path')
+      .attr('fill', 'none')
+      .attr('stroke', 'transparent')
+      .attr('stroke-width', 22)
+      .attr('cursor', 'ns-resize')
+      .style('pointer-events', 'stroke');
 
-    // Three drag handles along the user curve: middle (translate β₀),
-    // and at x at each end of the visible domain (rotate / change β₁).
+    // Middle handle (translate β₀ horizontally).
     const handleM = userG
       .append('circle')
-      .attr('r', 9)
+      .attr('r', 10)
       .attr('fill', CURVE_COLOR)
       .attr('stroke', '#fff')
       .attr('stroke-width', 1.5)
@@ -222,15 +240,20 @@ export default function LogisticPlot({
       .style('display', 'none');
 
     function updateUserCurve() {
-      if (!showUserCurve) {
+      const { showUserCurve: shown, curve: c } = stateRef.current;
+      if (!shown) {
         userPath.style('display', 'none');
+        userHit.style('display', 'none');
         handleM.style('display', 'none');
         return;
       }
       userPath.style('display', null);
+      userHit.style('display', null);
       handleM.style('display', null);
-      const { beta0, beta1 } = stateRef.current.curve;
-      userPath.attr('d', curvePath((x) => sigmoid(beta0 + beta1 * x), xRange, xScale, yScale));
+      const { beta0, beta1 } = c;
+      const d = curvePath((x) => sigmoid(beta0 + beta1 * x), xRange, xScale, yScale);
+      userPath.attr('d', d);
+      userHit.attr('d', d);
 
       // Middle handle: place at p = 0.5 if it falls inside, else at center of x range
       let midX;
@@ -248,17 +271,19 @@ export default function LogisticPlot({
     }
 
     function updateFitCurve() {
-      if (!showFit || !fit) {
+      const { showFit: shown, fit: f } = stateRef.current;
+      if (!shown || !f) {
         fitPath.style('display', 'none');
         return;
       }
       fitPath
         .style('display', null)
-        .attr('d', curvePath((x) => sigmoid(fit.beta0 + fit.beta1 * x), xRange, xScale, yScale));
+        .attr('d', curvePath((x) => sigmoid(f.beta0 + f.beta1 * x), xRange, xScale, yScale));
     }
 
     function updateLinear() {
-      if (!showLinear || !linearFit) {
+      const { showLinear: shown, linearFit: lf } = stateRef.current;
+      if (!shown || !lf) {
         linearPath.style('display', 'none');
         return;
       }
@@ -268,12 +293,13 @@ export default function LogisticPlot({
         .style('display', null)
         .attr('x1', xScale(x1))
         .attr('x2', xScale(x2))
-        .attr('y1', yScale(linearFit.slope * x1 + linearFit.intercept))
-        .attr('y2', yScale(linearFit.slope * x2 + linearFit.intercept));
+        .attr('y1', yScale(lf.slope * x1 + lf.intercept))
+        .attr('y2', yScale(lf.slope * x2 + lf.intercept));
     }
 
     function updateThreshold() {
-      if (!showThreshold || threshold === undefined) {
+      const { showThreshold: shown, threshold: t } = stateRef.current;
+      if (!shown || t === undefined || t === null) {
         thresholdLine.style('display', 'none');
         thresholdLabel.style('display', 'none');
         return;
@@ -282,42 +308,44 @@ export default function LogisticPlot({
         .style('display', null)
         .attr('x1', 0)
         .attr('x2', innerW)
-        .attr('y1', yScale(threshold))
-        .attr('y2', yScale(threshold));
+        .attr('y1', yScale(t))
+        .attr('y2', yScale(t));
       thresholdLabel
         .style('display', null)
         .attr('x', innerW / 2)
-        .attr('y', yScale(threshold) - 6)
-        .text(`threshold = ${threshold.toFixed(2)}`);
+        .attr('y', yScale(t) - 6)
+        .text(`threshold = ${t.toFixed(2)}`);
     }
 
     // Drag: middle handle horizontally → translate β₀ (curve slides left/right)
     handleM.call(
       d3.drag()
-        .on('start', () => userPath.attr('cursor', 'grabbing'))
         .on('drag', (event) => {
           const newMidX = Math.max(xRange[0], Math.min(xRange[1], xScale.invert(event.x)));
           const { beta1 } = stateRef.current.curve;
           // P=0.5 at -β₀/β₁. So β₀ = -newMidX * β₁
           const newB0 = -newMidX * beta1;
-          stateRef.current = { curve: { beta0: newB0, beta1 } };
+          stateRef.current = {
+            ...stateRef.current,
+            curve: { beta0: newB0, beta1 },
+          };
           onChangeRef.current?.({ beta0: newB0, beta1 });
           updateUserCurve();
         })
-        .on('end', () => userPath.attr('cursor', 'grab'))
     );
 
-    // Drag the curve itself vertically → change steepness (β₁)
+    // Drag the curve itself vertically → change steepness (β₁). The drag is
+    // attached to the wide transparent hit path so users can grab anywhere
+    // near the curve, not just on the 3-pixel stroke.
     let dragStartB1 = 0;
     let dragStartY = 0;
     let dragB0 = 0;
-    userPath.call(
+    userHit.call(
       d3.drag()
         .on('start', (event) => {
           dragStartB1 = stateRef.current.curve.beta1;
           dragStartY = event.y;
           dragB0 = stateRef.current.curve.beta0;
-          userPath.attr('cursor', 'grabbing');
         })
         .on('drag', (event) => {
           // Make β₁ respond to vertical drag scaled by the data x range.
@@ -342,11 +370,13 @@ export default function LogisticPlot({
             mid = (xRange[0] + xRange[1]) / 2;
           }
           const newB0 = -mid * newB1;
-          stateRef.current = { curve: { beta0: newB0, beta1: newB1 } };
+          stateRef.current = {
+            ...stateRef.current,
+            curve: { beta0: newB0, beta1: newB1 },
+          };
           onChangeRef.current?.({ beta0: newB0, beta1: newB1 });
           updateUserCurve();
         })
-        .on('end', () => userPath.attr('cursor', 'grab'))
     );
 
     elemsRef.current = {
@@ -364,25 +394,31 @@ export default function LogisticPlot({
     updateThreshold();
   }, [points, xLabel, yLabel, xRange, width, height]);
 
-  // Update on prop changes
+  // Update on prop changes — keep stateRef in sync so the imperative update
+  // functions (defined inside the structural effect) read fresh values via
+  // their stateRef closure rather than stale prop closures.
   useEffect(() => {
-    stateRef.current = { curve };
+    stateRef.current = { ...stateRef.current, curve };
     elemsRef.current.updateUserCurve?.();
   }, [curve]);
 
   useEffect(() => {
+    stateRef.current = { ...stateRef.current, showUserCurve };
     elemsRef.current.updateUserCurve?.();
   }, [showUserCurve]);
 
   useEffect(() => {
+    stateRef.current = { ...stateRef.current, showFit, fit };
     elemsRef.current.updateFitCurve?.();
   }, [showFit, fit]);
 
   useEffect(() => {
+    stateRef.current = { ...stateRef.current, showLinear, linearFit };
     elemsRef.current.updateLinear?.();
   }, [showLinear, linearFit]);
 
   useEffect(() => {
+    stateRef.current = { ...stateRef.current, showThreshold, threshold };
     elemsRef.current.updateThreshold?.();
   }, [showThreshold, threshold]);
 

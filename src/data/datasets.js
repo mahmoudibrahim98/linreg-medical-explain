@@ -28,7 +28,7 @@ export const datasets = [
     description:
       'In adult outpatient cohorts, body mass index is positively associated with systolic blood pressure. We simulate a small clinic of patients to see how strong that relationship looks at the individual level.',
     clinicalNote:
-      'A useful screening relationship — but BP is influenced by age, salt intake, medications, and stress, so any single line is a coarse summary.',
+      'A useful screening relationship, but BP is influenced by age, salt intake, medications, and stress, so any single line is a coarse summary.',
     xLabel: 'BMI (kg/m²)',
     yLabel: 'Systolic BP (mmHg)',
     xShort: 'BMI',
@@ -57,7 +57,7 @@ export const datasets = [
     description:
       'Glycated hemoglobin (HbA1c) tends to creep upward with age in the general non-diabetic population. We simulate a community sample to inspect that trend.',
     clinicalNote:
-      'The slope here is small and noisy — a reminder that statistically real effects can still be clinically modest.',
+      'The slope here is small and noisy, a reminder that statistically real effects can still be clinically modest.',
     xLabel: 'Age (years)',
     yLabel: 'HbA1c (%)',
     xShort: 'Age',
@@ -86,7 +86,7 @@ export const datasets = [
     description:
       'Larger primary tumors carry higher recurrence risk after resection. We simulate a registry of patients with a continuous risk score derived from a survival model.',
     clinicalNote:
-      'In real practice this relationship is non-linear and confounded by stage, grade, and treatment — useful to compare a linear approximation to a true non-linear truth.',
+      'In real practice this relationship is non-linear and confounded by stage, grade, and treatment, so it is useful to compare a linear approximation to a true non-linear truth.',
     xLabel: 'Tumor diameter (mm)',
     yLabel: '5-yr recurrence risk score (%)',
     xShort: 'Diameter',
@@ -115,7 +115,7 @@ export const datasets = [
     description:
       'For an analgesic in early-phase trials, the dose-response can look approximately linear over the tested range. We simulate a small dose-finding study with patient-reported pain reduction (VAS, 0–30 points).',
     clinicalNote:
-      'Real dose-response curves often plateau or have side-effect ceilings — beware extrapolating a linear fit beyond the data range.',
+      'Real dose-response curves often plateau or have side-effect ceilings, so beware extrapolating a linear fit beyond the data range.',
     xLabel: 'Dose (mg)',
     yLabel: 'Pain reduction (VAS points)',
     xShort: 'Dose',

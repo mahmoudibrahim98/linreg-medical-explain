@@ -114,9 +114,9 @@ export default function LinearExplainer() {
         <div className="kicker">AI in Medicine · Interactive primer</div>
         <h1>Linear Regression, in the Clinic</h1>
         <p className="subtitle">
-          A walkthrough of the simplest predictive model in medicine — and the
-          ideas (loss, fit, residuals, R²) it shares with every supervised ML
-          model you'll encounter later.
+          A walkthrough of the simplest predictive model in medicine, and of
+          the ideas (loss, fit, residuals, R²) it shares with every supervised
+          ML model you'll encounter later.
         </p>
       </header>
 
@@ -125,8 +125,8 @@ export default function LinearExplainer() {
           A clinician notices a trend: heavier patients tend to have higher
           blood pressure. Older patients tend to have higher HbA1c. Bigger
           tumors tend to recur more often. We want a way to <em>quantify</em>{' '}
-          and <em>predict</em> these trends — not just say "yes, there's a
-          relationship," but give a concrete number for a new patient.
+          and <em>predict</em> these trends, not just say "yes, there's a
+          relationship", but give a concrete number for a new patient.
         </p>
         <p>
           The simplest model is a straight line:{' '}
@@ -159,7 +159,7 @@ export default function LinearExplainer() {
       <section>
         <h2>Fit a line by hand</h2>
         <p className="prose">
-          Drag the orange line — grab either endpoint to tilt it, or drag the
+          Drag the orange line. Grab either endpoint to tilt it, or drag the
           middle to slide it up and down. Toggle <em>residuals</em> to see the
           per-patient errors, and <em>error squares</em> to see what
           least-squares is actually minimising. Hover any data point to compare
@@ -325,9 +325,9 @@ export default function LinearExplainer() {
           The slope tells you how much <strong>{dataset.yLabel}</strong>{' '}
           changes for each one-unit increase in <strong>{dataset.xLabel}</strong>{' '}
           ({slopeUnits}). The intercept is the model's prediction at{' '}
-          {dataset.xLabel} = 0 — often a clinically nonsensical value, which is
-          a good reason to be careful about extrapolating outside the observed
-          range.
+          {dataset.xLabel} = 0, often a clinically nonsensical value, which
+          is a good reason to be careful about extrapolating outside the
+          observed range.
         </p>
       </section>
 
@@ -338,11 +338,18 @@ export default function LinearExplainer() {
           <InlineMath math={String.raw`y_i`} /> and predicted value{' '}
           <InlineMath math={String.raw`\hat{y}_i = m\,x_i + b`} />, the
           residual is the gap{' '}
-          <InlineMath math={String.raw`y_i - \hat{y}_i`} /> — exactly the red
+          <InlineMath math={String.raw`y_i - \hat{y}_i`} />, exactly the red
           segments above. Turn on <em>error squares</em> and you'll see a
           square of side equal to that gap drawn next to each patient. The
-          area of each square is the residual squared; the average area is the{' '}
-          <strong>mean squared error</strong>:
+          area of each square is the residual squared, and the average area
+          is the <strong>mean squared error</strong>. Written in terms of
+          actual minus predicted:
+        </p>
+        <BlockMath math={String.raw`\mathrm{MSE} \;=\; \frac{1}{n}\sum_{i=1}^{n}\bigl(y_i - \hat{y}_i\bigr)^2`} />
+        <p className="prose">
+          and substituting the line{' '}
+          <InlineMath math={String.raw`\hat{y}_i = m\,x_i + b`} /> gives the
+          form we will minimise over m and b:
         </p>
         <BlockMath math={String.raw`\mathrm{MSE}(m,\,b) \;=\; \frac{1}{n}\sum_{i=1}^{n}\bigl(y_i - m\,x_i - b\bigr)^2`} />
 
@@ -361,11 +368,12 @@ export default function LinearExplainer() {
           Least-squares regression literally finds the (m, b) that makes the
           total area of those squares as small as possible. Why{' '}
           <em>squared</em>? Three reasons. (i) It penalises a few large
-          mistakes more than many small ones — clinically appropriate when a
-          single very wrong prediction can mislead a treatment decision. (ii)
-          It makes the math tractable: the optimum has a closed-form solution.
-          (iii) It corresponds to the maximum-likelihood estimate when noise is
-          Gaussian — a reasonable default for many continuous biomarkers.
+          mistakes more than many small ones, which is clinically appropriate
+          when a single very wrong prediction can mislead a treatment
+          decision. (ii) It makes the math tractable: the optimum has a
+          closed-form solution. (iii) It corresponds to the
+          maximum-likelihood estimate when noise is Gaussian, a reasonable
+          default for many continuous biomarkers.
         </p>
       </section>
 
@@ -375,7 +383,7 @@ export default function LinearExplainer() {
           Every choice of slope (m) and intercept (b) gives one MSE value. Plot
           MSE over the (m, b) plane and you get a <em>landscape</em>. For
           linear regression with squared error this landscape is a smooth bowl
-          with one minimum — the optimum the least-squares formula jumps
+          with one minimum: the optimum the least-squares formula jumps
           straight to. Drag the line on the scatter plot above and watch the
           orange dot move on this landscape.
         </p>
@@ -397,7 +405,8 @@ export default function LinearExplainer() {
             <p>
               <strong>Why this matters for ML.</strong> More complex models
               (logistic regression, neural networks) have <em>much</em> bumpier
-              landscapes — many local minima, saddle points, plateaus. We can
+              landscapes, with many local minima, saddle points, and plateaus.
+              We can
               no longer solve them with a closed-form formula and resort to{' '}
               <em>gradient descent</em>: take small steps downhill until we
               land somewhere flat. Linear regression is the gentle introduction
@@ -408,7 +417,7 @@ export default function LinearExplainer() {
       </section>
 
       <section>
-        <h2>How well does the line fit? — R²</h2>
+        <h2>How well does the line fit? Reading R²</h2>
         <p className="prose">
           MSE has units (mmHg², or %², or VAS-points²) and is hard to compare
           across problems. The <strong>coefficient of determination R²</strong>{' '}
@@ -421,7 +430,7 @@ export default function LinearExplainer() {
           squared residuals around your line.{' '}
           <InlineMath math={String.raw`SS_{\text{tot}}`} /> is the sum of
           squared deviations of the y values around their mean{' '}
-          <InlineMath math={String.raw`\bar{y}`} /> — i.e., what you'd get
+          <InlineMath math={String.raw`\bar{y}`} />, i.e., what you'd get
           from a "constant model" that ignores x. R² ranges from 1 (perfect
           fit) to 0 (no better than the mean) and can even go negative for a
           sufficiently bad line.
@@ -431,7 +440,7 @@ export default function LinearExplainer() {
           this dataset means the line explains {Math.round(bestR2 * 100)}% of
           the variance in {dataset.yLabel.toLowerCase()}. The other{' '}
           {Math.round((1 - bestR2) * 100)}% is biological variation, measurement
-          noise, and effects of variables we didn't include — comorbidities,
+          noise, and effects of variables we didn't include: comorbidities,
           medications, time of day, genetics. A "good" R² depends entirely on
           the question: 0.10 may be useful for population-level epidemiology,
           while 0.95 may be inadequate for an individual diagnostic decision.
@@ -439,15 +448,15 @@ export default function LinearExplainer() {
       </section>
 
       <section>
-        <h2>When the line breaks — nonlinear relationships</h2>
+        <h2>When the line breaks: nonlinear relationships</h2>
         <p className="prose">
           Linear regression is a <em>hypothesis</em> about the world: that the
           outcome changes by the same amount for every unit of input. Plenty
-          of clinical relationships violate that — receptors saturate, risk
+          of clinical relationships violate that: receptors saturate, risk
           curves bend, biology has thresholds. Pick a scenario below and watch
           how a straight line struggles, while a polynomial of higher degree
           can recover the shape. The mini chart underneath plots the{' '}
-          <em>residuals</em> — when the model is wrong in a structured way,
+          <em>residuals</em>; when the model is wrong in a structured way,
           you can see it directly.
         </p>
 
@@ -559,12 +568,12 @@ export default function LinearExplainer() {
 
         <p className="prose">
           <strong>What to look for.</strong> At degree 1 the residuals form an
-          unmistakable shape — a U for the J-curve, a wave for the saturation
+          unmistakable shape: a U for the J-curve, a wave for the saturation
           curve. That's the diagnostic signature of model misspecification:
           the model is wrong in a way the data is telling you about. Bumping
           the degree to 2 or 3 typically wipes out most of the structure.
-          Going further (degree 4–5) gives only marginal gains here and starts
-          to chase noise — the beginning of <em>overfitting</em>.
+          Going further (degree 4 or 5) gives only marginal gains here and
+          starts to chase noise, the beginning of <em>overfitting</em>.
         </p>
         <p className="prose">
           <strong>Why this matters.</strong> The same logic underlies the
@@ -577,7 +586,7 @@ export default function LinearExplainer() {
         </p>
         <p className="prose">
           <strong>Note on transformations.</strong> When you know the shape in
-          advance — saturation, exponential decay, a ratio — fitting a model
+          advance (saturation, exponential decay, a ratio), fitting a model
           that <em>matches</em> that shape (Hill equation, log-linear,
           piecewise) usually beats throwing higher polynomial degrees at it.
           Polynomials wiggle outside the data range; structured models
@@ -611,7 +620,7 @@ export default function LinearExplainer() {
           </li>
           <li>
             <strong>It's a baseline, not the destination.</strong> Linear
-            regression is your null model — the thing every fancier method
+            regression is your null model: the thing every fancier method
             should beat before you trust it.
           </li>
         </ul>

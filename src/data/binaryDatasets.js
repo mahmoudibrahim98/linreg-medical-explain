@@ -25,7 +25,7 @@ export const binaryDatasets = [
     label: 'Tumor diameter → malignant vs. benign',
     short: 'Tumor → malignancy',
     description:
-      'A breast or thyroid clinic measures tumor diameter at presentation. Larger lesions are more often malignant on biopsy — but the relationship is probabilistic, not absolute.',
+      'A breast or thyroid clinic measures tumor diameter at presentation. Larger lesions are more often malignant on biopsy, but the relationship is probabilistic, not absolute.',
     clinicalNote:
       'Diameter alone is a weak classifier in real practice; histology, imaging features, and risk factors add far more information. We use it here because the clinical intuition (bigger ≈ scarier) is universal.',
     xLabel: 'Tumor diameter (mm)',
@@ -85,7 +85,7 @@ export const binaryDatasets = [
     description:
       'Prostate-specific antigen is a continuous biomarker; a higher value raises (but does not guarantee) the probability of cancer on biopsy. Logistic regression turns the level into a probability.',
     clinicalNote:
-      'PSA has well-known false positives (BPH, prostatitis) and false negatives. Modern practice uses PSA density, free/total ratio, and MRI — not PSA alone.',
+      'PSA has well-known false positives (BPH, prostatitis) and false negatives. Modern practice uses PSA density, free/total ratio, and MRI, not PSA alone.',
     xLabel: 'PSA (ng/mL)',
     yLabel: 'P(cancer on biopsy)',
     xShort: 'PSA',

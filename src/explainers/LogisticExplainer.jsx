@@ -57,7 +57,7 @@ export default function LogisticExplainer() {
   const userLoss = logLoss(points, userPredict);
   const bestLoss = logLoss(points, bestPredict);
 
-  // Use the ML fit for confusion matrix and ROC — that's the "deployed" model;
+  // Use the ML fit for confusion matrix and ROC. That's the "deployed" model;
   // students manipulate the user curve in the earlier section to learn the
   // interaction. (We could also use the user curve, but tying threshold tools
   // to the best-fit model keeps the downstream metrics meaningful.)
@@ -79,7 +79,7 @@ export default function LogisticExplainer() {
         <p className="subtitle">
           From "how much" to "yes or no": when the question is whether a
           patient has the disease, will respond to treatment, or will be
-          readmitted, we need a model that produces probabilities — not a
+          readmitted, we need a model that produces probabilities, not a
           line.
         </p>
       </header>
@@ -89,13 +89,13 @@ export default function LogisticExplainer() {
           Most clinical decisions are binary at the moment of action. Does
           this lump need a biopsy? Does this troponin level mean MI? Will
           this antibiotic course succeed? The outcome we care about isn't a
-          number on a continuous scale — it's a label, with two values.
+          number on a continuous scale; it's a label, with two values.
           Linear regression handles continuous outcomes; for binary outcomes
           we need <em>logistic regression</em>.
         </p>
         <p>
-          Logistic regression keeps the same skeleton as linear regression —
-          one input, two parameters, a loss function — but bends the output
+          Logistic regression keeps the same skeleton as linear regression
+          (one input, two parameters, a loss function), but bends the output
           through a curve that always lands between 0 and 1, so we can read
           it as a probability. Once we have a probability, a clinician picks
           a <em>threshold</em> at which to act. Choosing that threshold is
@@ -120,7 +120,7 @@ export default function LogisticExplainer() {
           ({dataset.positiveLabel}) are stacked along y = 1; without
           ({dataset.negativeLabel}), along y = 0. In this simulated cohort,{' '}
           <strong>{positiveCount}</strong> of {points.length} patients have
-          the outcome — a base rate of {(baseRate * 100).toFixed(0)}%.
+          the outcome, a base rate of {(baseRate * 100).toFixed(0)}%.
         </p>
       </section>
 
@@ -129,7 +129,7 @@ export default function LogisticExplainer() {
         <p>
           Imagine fitting a regular linear regression to these 0/1 outcomes.
           The fitted line will go where the data centroid is, but its
-          predictions are nonsense as probabilities — they go below 0 for
+          predictions are nonsense as probabilities. They go below 0 for
           low-risk patients and above 1 for high-risk patients. The line
           can't bend, so it leaks out of the [0, 1] range that probabilities
           must live in.
@@ -151,7 +151,7 @@ export default function LogisticExplainer() {
         />
         <p className="caption">
           The orange line is the least-squares fit treating outcomes as 0/1.
-          Notice where it crosses outside the dashed [0, 1] band — those
+          Notice where it crosses outside the dashed [0, 1] band: those
           regions correspond to "predicted probabilities" that are either
           negative or greater than 1. Useless for clinical reasoning.
         </p>
@@ -168,8 +168,8 @@ export default function LogisticExplainer() {
           math={String.raw`P(y = 1 \mid x) \;=\; \sigma(\beta_0 + \beta_1 x) \;=\; \frac{1}{1 + e^{-(\beta_0 + \beta_1 x)}}`}
         />
         <p>
-          Inside the parentheses we still have a familiar straight line —{' '}
-          <InlineMath math={String.raw`\beta_0 + \beta_1 x`} /> — but the
+          Inside the parentheses we still have a familiar straight line,{' '}
+          <InlineMath math={String.raw`\beta_0 + \beta_1 x`} />, but the
           sigmoid wrapper bends it smoothly so the output is always between
           0 and 1. <InlineMath math={String.raw`\beta_0`} /> shifts the
           curve left and right;{' '}
@@ -269,7 +269,7 @@ export default function LogisticExplainer() {
       </section>
 
       <section>
-        <h2>How we measure fit — log-loss</h2>
+        <h2>How we measure fit: log-loss</h2>
         <p>
           Squared error doesn't behave well when the target is a 0/1 label.
           Logistic regression uses the <strong>log-loss</strong> (or
@@ -281,14 +281,14 @@ export default function LogisticExplainer() {
         <p>
           Reading it patient by patient: if the truth is{' '}
           <InlineMath math={String.raw`y = 1`} />, the loss is{' '}
-          <InlineMath math={String.raw`-\log(p)`} /> — a heavy penalty when{' '}
+          <InlineMath math={String.raw`-\log(p)`} />, a heavy penalty when{' '}
           <InlineMath math={String.raw`p`} /> is close to 0. If the truth is{' '}
           <InlineMath math={String.raw`y = 0`} />, the loss is{' '}
-          <InlineMath math={String.raw`-\log(1 - p)`} /> — a heavy penalty
+          <InlineMath math={String.raw`-\log(1 - p)`} />, a heavy penalty
           when <InlineMath math={String.raw`p`} /> is close to 1. The model
           is rewarded for confident correct predictions and punished sharply
-          for confident wrong ones — clinically what we want from a
-          probability estimate.
+          for confident wrong ones, which is exactly what we want from a
+          clinical probability estimate.
         </p>
         <div className="loss-row" style={{ marginTop: 12 }}>
           <div className="metric-col user" style={{ minWidth: 240 }}>
@@ -343,9 +343,10 @@ export default function LogisticExplainer() {
         <h2>Turning a probability into a decision</h2>
         <p>
           A probability is not yet a decision. Some clinical settings demand a
-          low threshold (you'd rather over-call than miss the diagnosis —{' '}
-          <em>screening</em>). Others demand a high threshold (acting on a
-          positive is invasive or expensive — <em>confirmation</em>). Move
+          low threshold (you'd rather over-call than miss the diagnosis, the{' '}
+          <em>screening</em> setting). Others demand a high threshold (acting
+          on a positive is invasive or expensive, the{' '}
+          <em>confirmation</em> setting). Move
           the slider below; everything updates: the threshold line on the
           curve, who the model labels positive, and the four cells of the
           confusion matrix.
@@ -406,7 +407,7 @@ export default function LogisticExplainer() {
           As you raise the threshold, fewer patients get labelled{' '}
           {dataset.positiveLabel}. Sensitivity drops (you catch fewer true
           cases) but specificity rises (you call fewer healthy patients sick).
-          That trade-off is fundamental — there is no threshold that's best
+          That trade-off is fundamental: there is no threshold that's best
           for every setting.
         </p>
       </section>
@@ -415,8 +416,8 @@ export default function LogisticExplainer() {
         <h2>The ROC curve and AUC</h2>
         <p>
           Sweeping the threshold from 1 down to 0 traces a curve through{' '}
-          <InlineMath math={String.raw`(\text{FPR},\ \text{TPR})`} /> space —
-          the receiver operating characteristic, or ROC, curve. A
+          <InlineMath math={String.raw`(\text{FPR},\ \text{TPR})`} /> space.
+          That's the receiver operating characteristic, or ROC, curve. A
           model that doesn't discriminate at all sits on the diagonal; a
           perfect model jumps to the top-left corner. The area under the
           curve (AUC) summarises discrimination across all thresholds.
@@ -429,7 +430,7 @@ export default function LogisticExplainer() {
           />
           <div className="roc-narration">
             <p>
-              <strong>AUC = {roc.auc.toFixed(3)}</strong> — the probability
+              <strong>AUC = {roc.auc.toFixed(3)}</strong>: the probability
               that a randomly chosen{' '}
               <span style={{ color: '#dc2626' }}>{dataset.positiveLabel}</span>{' '}
               patient gets a higher score than a randomly chosen{' '}
@@ -443,7 +444,7 @@ export default function LogisticExplainer() {
             </p>
             <p>
               <strong>Clinical context.</strong> AUC is <em>not</em> a
-              calibration measure — a model can have an excellent AUC and
+              calibration measure: a model can have an excellent AUC and
               still produce probabilities that don't match observed
               frequencies. For decision-making you usually want both good
               discrimination (AUC) and good calibration (predicted P actually
@@ -455,7 +456,7 @@ export default function LogisticExplainer() {
       </section>
 
       <section>
-        <h2>Reading the coefficient — odds ratios</h2>
+        <h2>Reading the coefficient: odds ratios</h2>
         <p>
           <InlineMath math={String.raw`\beta_1`} /> in logistic regression has
           a specific clinical meaning. Recall the form:
@@ -510,8 +511,8 @@ export default function LogisticExplainer() {
             <strong>The threshold matters more than the AUC.</strong> Every
             deployed model has to commit to a threshold, and that choice
             depends on the costs of false positives vs. false negatives in{' '}
-            <em>your</em> setting. Two clinics using the same model can —
-            correctly — pick different thresholds.
+            <em>your</em> setting. Two clinics using the same model can,
+            correctly, pick different thresholds.
           </li>
           <li>
             <strong>Class imbalance distorts metrics.</strong> If 5% of
@@ -537,12 +538,12 @@ export default function LogisticExplainer() {
           <li>
             <strong>One feature is rarely enough.</strong> Real risk scores
             combine many predictors. Logistic regression scales naturally to
-            multiple inputs — and the coefficient on each feature is the
+            multiple inputs, and the coefficient on each feature is the
             adjusted log-odds, holding the others fixed.
           </li>
           <li>
             <strong>It's a baseline, not the destination.</strong> Logistic
-            regression is your null model for binary outcomes — the thing
+            regression is your null model for binary outcomes: the thing
             every fancier classifier (random forest, gradient boosting,
             neural net) should beat by enough to justify its complexity.
           </li>

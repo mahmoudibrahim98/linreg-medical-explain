@@ -308,8 +308,8 @@ export default function WorkedExample({
           />
         </div>
         <p className="worked-foot">
-          Drag the line above and watch every cell in this table — and the
-          full-cohort MSE — update. The least-squares fit is exactly the line
+          Drag the line above and watch every cell in this table, plus the
+          full-cohort MSE, update. The least-squares fit is exactly the line
           that makes the sum of squared errors as small as possible.
         </p>
       </div>
