@@ -149,7 +149,7 @@ body,
   line-height: 1.55;
   color: var(--ink-mute);
   margin: 0;
-  max-width: 60ch;
+  max-width: 64ch;
   font-weight: 400;
 }
 
@@ -207,7 +207,7 @@ section.prose:first-of-type::before {
 .app section > p,
 .prose,
 .prose p {
-  max-width: 64ch;
+  max-width: 72ch;
   color: var(--ink-soft);
   margin: 0 0 18px;
   font-size: 16.5px;
@@ -362,7 +362,7 @@ code {
 .dataset-desc {
   margin: 14px 0 10px;
   color: var(--ink-soft);
-  max-width: 64ch;
+  max-width: 72ch;
   line-height: 1.65;
 }
 
@@ -374,7 +374,7 @@ code {
   font-size: 14.5px;
   line-height: 1.6;
   color: var(--ink-soft);
-  max-width: 64ch;
+  max-width: 72ch;
   border-radius: 0 6px 6px 0;
 }
 
@@ -388,7 +388,7 @@ code {
   color: var(--muted);
   margin: 14px 0 0;
   font-style: italic;
-  max-width: 64ch;
+  max-width: 72ch;
   line-height: 1.6;
 }
 
@@ -857,7 +857,7 @@ code {
   line-height: 1.6;
   color: var(--muted);
   margin-top: 18px;
-  max-width: 64ch;
+  max-width: 72ch;
   border-top: 1px solid var(--rule-soft);
   padding-top: 12px;
 }
@@ -930,7 +930,7 @@ code {
 .worked-intro {
   margin: 0 0 14px;
   color: var(--ink-soft);
-  max-width: 64ch;
+  max-width: 72ch;
   font-size: 14.5px;
 }
 
@@ -1955,7 +1955,7 @@ code {
 }
 
 .caveats li {
-  max-width: 64ch;
+  max-width: 72ch;
   padding: 12px 14px 12px 16px;
   border-left: 3px solid var(--rule);
   background: rgba(0, 0, 0, 0.015);
@@ -1979,7 +1979,7 @@ code {
 
 .footer p {
   margin: 0;
-  max-width: 64ch;
+  max-width: 72ch;
 }
 
 @media (max-width: 700px) {
