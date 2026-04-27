@@ -1657,6 +1657,51 @@ code {
   max-width: 600px;
 }
 
+/* Step-by-step build layout: regions next to narration, tree diagram below
+   at full content width. */
+.tree-narration-row {
+  display: grid;
+  grid-template-columns: minmax(360px, 1.05fr) minmax(260px, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin: 8px 0 14px;
+}
+
+.tree-narration-row > .scatter-svg {
+  width: 100%;
+  height: auto;
+  max-width: 520px;
+  justify-self: start;
+}
+
+.tree-narration-row > .step-narration {
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .tree-narration-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tree-fullwidth {
+  /* Break out of the .app's narrow content column so the tree gets the
+     viewport's horizontal real estate. Capped at a sensible max so it
+     doesn't sprawl on ultrawide displays. */
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1280px, calc(100vw - 32px));
+  margin: 18px auto 18px;
+}
+
+.tree-fullwidth .tree-svg {
+  width: 100%;
+  height: auto;
+  max-height: 540px;
+  background: var(--surface);
+}
+
 /* Build-step controls ----------------------------------------------------- */
 .build-step-row {
   display: flex;

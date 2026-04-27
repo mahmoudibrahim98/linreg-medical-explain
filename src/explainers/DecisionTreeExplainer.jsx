@@ -45,9 +45,9 @@ export default function DecisionTreeExplainer() {
   );
 
   // Build a moderately-deep tree once; the build-step slider then exposes
-  // it incrementally. Depth 4 is enough to be interesting without making
-  // the tree diagram unreadable.
-  const BUILD_DEPTH = 4;
+  // it incrementally. Depth 3 keeps the tree readable at full content
+  // width while still illustrating multi-level splits.
+  const BUILD_DEPTH = 3;
   const fullTree = useMemo(() => {
     const t = buildTree(points, BUILD_DEPTH);
     annotateTree(t);
@@ -210,97 +210,7 @@ export default function DecisionTreeExplainer() {
           </button>
         </div>
 
-        <div className="step-narration">
-          {step === 0 ? (
-            <>
-              <div className="step-title">
-                Starting point: all patients in one bucket
-              </div>
-              <p>
-                Before the algorithm picks any split, the whole cohort sits
-                in a single leaf. The "model" predicts the majority class
-                for everyone:
-              </p>
-              <ul className="step-detail-list">
-                <li>
-                  <strong>n = {fullTree.n}</strong> patients in this leaf
-                </li>
-                <li>
-                  <strong>{fullTree.pos}</strong> positive (
-                  {dataset.positiveLabel}) /{' '}
-                  <strong>{fullTree.n - fullTree.pos}</strong> negative (
-                  {dataset.negativeLabel})
-                </li>
-                <li>
-                  Gini impurity:{' '}
-                  <InlineMath
-                    math={String.raw`G = ${fullTree.gini.toFixed(3)}`}
-                  />
-                </li>
-              </ul>
-              <p>
-                Use <em>next →</em> to apply the first split and watch the
-                feature space carve up.
-              </p>
-            </>
-          ) : (
-            <>
-              <div className="step-title">
-                Split {step} of {splits.length}:{' '}
-                <span className="step-rule">
-                  <InlineMath
-                    math={String.raw`\mathrm{${featLabel}} \le ${currentSplit.threshold.toFixed(1)}`}
-                  />
-                  {featUnit ? ` ${featUnit}` : ''}
-                </span>
-              </div>
-              <p>
-                The algorithm scanned every feature and every candidate
-                threshold and picked this one because it gave the largest
-                reduction in Gini impurity. The split takes a leaf with{' '}
-                <strong>n = {currentSplit.n}</strong> patients (gini ={' '}
-                {currentSplit.gini.toFixed(3)}) and divides it into:
-              </p>
-              <ul className="step-detail-list">
-                <li>
-                  <span className="branch-tag yes">yes</span>{' '}
-                  <InlineMath
-                    math={String.raw`\mathrm{${featLabel}} \le ${currentSplit.threshold.toFixed(1)}`}
-                  />
-                  : <strong>n = {currentSplit.left.n}</strong>,{' '}
-                  {currentSplit.left.pos}/{currentSplit.left.n} (
-                  {pct(currentSplit.left.pos, currentSplit.left.n)}){' '}
-                  {dataset.positiveLabel}, gini ={' '}
-                  {currentSplit.left.gini.toFixed(3)}
-                </li>
-                <li>
-                  <span className="branch-tag no">no</span>{' '}
-                  <InlineMath
-                    math={String.raw`\mathrm{${featLabel}} > ${currentSplit.threshold.toFixed(1)}`}
-                  />
-                  : <strong>n = {currentSplit.right.n}</strong>,{' '}
-                  {currentSplit.right.pos}/{currentSplit.right.n} (
-                  {pct(currentSplit.right.pos, currentSplit.right.n)}){' '}
-                  {dataset.positiveLabel}, gini ={' '}
-                  {currentSplit.right.gini.toFixed(3)}
-                </li>
-                <li>
-                  Gini reduction:{' '}
-                  <InlineMath
-                    math={String.raw`\Delta G = ${currentSplit.gain.toFixed(3)}`}
-                  />
-                </li>
-              </ul>
-              <p>
-                On the plot, the freshly created boundary is the new
-                rectangle edge. On the tree diagram, the highlighted box is
-                the split that just fired.
-              </p>
-            </>
-          )}
-        </div>
-
-        <div className="tree-row">
+        <div className="tree-narration-row">
           <DecisionRegions
             points={points}
             tree={partialTree}
@@ -311,12 +221,107 @@ export default function DecisionTreeExplainer() {
             positiveLabel={dataset.positiveLabel}
             negativeLabel={dataset.negativeLabel}
           />
+          <div className="step-narration">
+            {step === 0 ? (
+              <>
+                <div className="step-title">
+                  Starting point: all patients in one bucket
+                </div>
+                <p>
+                  Before the algorithm picks any split, the whole cohort
+                  sits in a single leaf. The "model" predicts the majority
+                  class for everyone:
+                </p>
+                <ul className="step-detail-list">
+                  <li>
+                    <strong>n = {fullTree.n}</strong> patients in this leaf
+                  </li>
+                  <li>
+                    <strong>{fullTree.pos}</strong> positive (
+                    {dataset.positiveLabel}) /{' '}
+                    <strong>{fullTree.n - fullTree.pos}</strong> negative (
+                    {dataset.negativeLabel})
+                  </li>
+                  <li>
+                    Gini impurity:{' '}
+                    <InlineMath
+                      math={String.raw`G = ${fullTree.gini.toFixed(3)}`}
+                    />
+                  </li>
+                </ul>
+                <p>
+                  Use <em>next →</em> to apply the first split and watch
+                  the feature space carve up.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="step-title">
+                  Split {step} of {splits.length}:{' '}
+                  <span className="step-rule">
+                    <InlineMath
+                      math={String.raw`\mathrm{${featLabel}} \le ${currentSplit.threshold.toFixed(1)}`}
+                    />
+                    {featUnit ? ` ${featUnit}` : ''}
+                  </span>
+                </div>
+                <p>
+                  The algorithm scanned every feature and every candidate
+                  threshold and picked this one because it gave the
+                  largest reduction in Gini impurity. The split takes a
+                  leaf with <strong>n = {currentSplit.n}</strong> patients
+                  (gini = {currentSplit.gini.toFixed(3)}) and divides it
+                  into:
+                </p>
+                <ul className="step-detail-list">
+                  <li>
+                    <span className="branch-tag yes">yes</span>{' '}
+                    <InlineMath
+                      math={String.raw`\mathrm{${featLabel}} \le ${currentSplit.threshold.toFixed(1)}`}
+                    />
+                    : <strong>n = {currentSplit.left.n}</strong>,{' '}
+                    {currentSplit.left.pos}/{currentSplit.left.n} (
+                    {pct(currentSplit.left.pos, currentSplit.left.n)}){' '}
+                    {dataset.positiveLabel}, gini ={' '}
+                    {currentSplit.left.gini.toFixed(3)}
+                  </li>
+                  <li>
+                    <span className="branch-tag no">no</span>{' '}
+                    <InlineMath
+                      math={String.raw`\mathrm{${featLabel}} > ${currentSplit.threshold.toFixed(1)}`}
+                    />
+                    : <strong>n = {currentSplit.right.n}</strong>,{' '}
+                    {currentSplit.right.pos}/{currentSplit.right.n} (
+                    {pct(currentSplit.right.pos, currentSplit.right.n)}){' '}
+                    {dataset.positiveLabel}, gini ={' '}
+                    {currentSplit.right.gini.toFixed(3)}
+                  </li>
+                  <li>
+                    Gini reduction:{' '}
+                    <InlineMath
+                      math={String.raw`\Delta G = ${currentSplit.gain.toFixed(3)}`}
+                    />
+                  </li>
+                </ul>
+                <p>
+                  On the plot above, the freshly created boundary is the
+                  new rectangle edge. On the tree diagram below, the
+                  highlighted box is the split that just fired.
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="tree-fullwidth">
           <TreeDiagram
             tree={partialTree}
             highlightNodeId={currentSplit ? currentSplit.__id : null}
             featureLabels={{ x1: dataset.x1Short, x2: dataset.x2Short }}
             positiveLabel={dataset.positiveLabel}
             negativeLabel={dataset.negativeLabel}
+            width={1000}
+            height={420}
           />
         </div>
 
