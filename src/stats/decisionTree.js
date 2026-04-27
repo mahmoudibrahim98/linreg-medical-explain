@@ -149,3 +149,66 @@ export function maxDepthOf(tree) {
   if (tree.type === 'leaf') return tree.depth;
   return Math.max(maxDepthOf(tree.left), maxDepthOf(tree.right));
 }
+
+// Convert a split node into a leaf that aggregates its descendants' stats.
+function splitToLeaf(node) {
+  if (node.type === 'leaf') return node;
+  const probability = node.n === 0 ? 0 : node.pos / node.n;
+  return {
+    type: 'leaf',
+    prediction: probability >= 0.5 ? 1 : 0,
+    probability,
+    n: node.n,
+    pos: node.pos,
+    neg: node.n - node.pos,
+    gini: node.gini,
+    depth: node.depth,
+  };
+}
+
+// All split nodes of the tree in BFS (level-order) order. Each entry is a
+// reference to the actual split node in the tree, with its left/right
+// children intact so callers can read child stats.
+export function enumerateSplits(tree) {
+  const result = [];
+  const queue = [tree];
+  while (queue.length > 0) {
+    const node = queue.shift();
+    if (node && node.type === 'split') {
+      result.push(node);
+      queue.push(node.left, node.right);
+    }
+  }
+  return result;
+}
+
+// Returns a structurally similar tree where only the first `maxSplits` splits
+// (in BFS order) are kept; everything past that is collapsed into a leaf.
+export function truncateTree(tree, maxSplits) {
+  if (!tree) return tree;
+  if (maxSplits <= 0) return splitToLeaf(tree);
+
+  const allowed = new Set();
+  const queue = [tree];
+  while (queue.length > 0 && allowed.size < maxSplits) {
+    const node = queue.shift();
+    if (node && node.type === 'split') {
+      allowed.add(node);
+      queue.push(node.left, node.right);
+    }
+  }
+
+  function transform(node) {
+    if (!node || node.type === 'leaf') return node;
+    if (allowed.has(node)) {
+      return {
+        ...node,
+        left: transform(node.left),
+        right: transform(node.right),
+      };
+    }
+    return splitToLeaf(node);
+  }
+
+  return transform(tree);
+}
