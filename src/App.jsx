@@ -5,9 +5,9 @@ import DatasetPicker from './components/DatasetPicker';
 import ScatterPlot from './components/ScatterPlot';
 import MetricsPanel from './components/MetricsPanel';
 import LossSurface from './components/LossSurface';
+import FormulaCard from './components/FormulaCard';
 
 function defaultStartLine(dataset) {
-  // A flat, mid-height line — gives students an obviously imperfect starting point.
   const mid = (dataset.yRange[0] + dataset.yRange[1]) / 2;
   return { slope: 0, intercept: mid };
 }
@@ -36,14 +36,20 @@ export default function App() {
   );
 
   const [line, setLine] = useState(() => defaultStartLine(dataset));
+  const [predictX, setPredictX] = useState(
+    () => (dataset.xRange[0] + dataset.xRange[1]) / 2
+  );
 
-  // Reset the user line when dataset changes.
+  // Reset interactives when dataset changes.
   useEffect(() => {
     setLine(defaultStartLine(dataset));
+    setPredictX((dataset.xRange[0] + dataset.xRange[1]) / 2);
   }, [datasetId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [showResiduals, setShowResiduals] = useState(false);
+  const [showSquares, setShowSquares] = useState(false);
   const [showBest, setShowBest] = useState(false);
+  const [predictionMode, setPredictionMode] = useState(false);
 
   const userMSE = mse(points, line.slope, line.intercept);
   const bestMSE = mse(points, best.slope, best.intercept);
@@ -51,6 +57,7 @@ export default function App() {
   const bestR2 = r2(points, best.slope, best.intercept);
 
   const slopeUnits = `${dataset.yUnit}/${dataset.xUnit}`;
+  const yPredAtX = line.slope * predictX + line.intercept;
 
   return (
     <div className="app">
@@ -105,9 +112,20 @@ export default function App() {
         <p className="prose">
           Drag the orange line — grab either endpoint to tilt it, or drag the
           middle to slide it up and down. Toggle <em>residuals</em> to see the
-          per-patient errors your line makes. Your goal: make the residuals as
-          short as possible, on average.
+          per-patient errors, and <em>error squares</em> to see what
+          least-squares is actually minimising. Hover any data point to compare
+          its true value to your model's prediction.
         </p>
+
+        <FormulaCard
+          userSlope={line.slope}
+          userIntercept={line.intercept}
+          bestSlope={best.slope}
+          bestIntercept={best.intercept}
+          xShort={dataset.xShort}
+          yShort={dataset.yShort}
+        />
+
         <div className="plot-row">
           <div className="plot-and-controls">
             <ScatterPlot
@@ -118,9 +136,17 @@ export default function App() {
               bestSlope={best.slope}
               bestIntercept={best.intercept}
               showResiduals={showResiduals}
+              showSquares={showSquares}
               showBest={showBest}
+              predictionMode={predictionMode}
+              predictX={predictX}
+              onPredictXChange={setPredictX}
               xLabel={dataset.xLabel}
               yLabel={dataset.yLabel}
+              xShort={dataset.xShort}
+              yShort={dataset.yShort}
+              xUnit={dataset.xUnit}
+              yUnit={dataset.yUnit}
               xRange={dataset.xRange}
               yRange={dataset.yRange}
             />
@@ -131,7 +157,15 @@ export default function App() {
                   checked={showResiduals}
                   onChange={(e) => setShowResiduals(e.target.checked)}
                 />
-                Show residuals
+                <span className="swatch swatch-residual" /> Residuals
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showSquares}
+                  onChange={(e) => setShowSquares(e.target.checked)}
+                />
+                <span className="swatch swatch-square" /> Error squares
               </label>
               <label>
                 <input
@@ -139,24 +173,72 @@ export default function App() {
                   checked={showBest}
                   onChange={(e) => setShowBest(e.target.checked)}
                 />
-                Show least-squares fit
+                <span className="swatch swatch-best" /> Least-squares fit
               </label>
-              <button
-                className="btn primary"
-                onClick={() => setLine({ slope: best.slope, intercept: best.intercept })}
-              >
-                Snap to best fit
-              </button>
-              <button
-                className="btn"
-                onClick={() => setLine(defaultStartLine(dataset))}
-              >
-                Reset line
-              </button>
-              <button className="btn" onClick={() => setSeed((s) => s + 1)}>
-                New sample
-              </button>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={predictionMode}
+                  onChange={(e) => setPredictionMode(e.target.checked)}
+                />
+                <span className="swatch swatch-pred" /> Make a prediction
+              </label>
+              <div className="control-actions">
+                <button
+                  className="btn primary"
+                  onClick={() =>
+                    setLine({ slope: best.slope, intercept: best.intercept })
+                  }
+                >
+                  Snap to best fit
+                </button>
+                <button
+                  className="btn"
+                  onClick={() => setLine(defaultStartLine(dataset))}
+                >
+                  Reset line
+                </button>
+                <button className="btn" onClick={() => setSeed((s) => s + 1)}>
+                  New sample
+                </button>
+              </div>
             </div>
+
+            {predictionMode && (
+              <div className="prediction-panel">
+                <div className="prediction-header">
+                  Predict for a hypothetical patient
+                </div>
+                <div className="prediction-slider-row">
+                  <label htmlFor="px-slider">{dataset.xShort}:</label>
+                  <input
+                    id="px-slider"
+                    type="range"
+                    min={dataset.xRange[0]}
+                    max={dataset.xRange[1]}
+                    step={(dataset.xRange[1] - dataset.xRange[0]) / 200}
+                    value={predictX}
+                    onChange={(e) => setPredictX(parseFloat(e.target.value))}
+                  />
+                  <span className="prediction-x-readout">
+                    {predictX.toFixed(1)} {dataset.xUnit}
+                  </span>
+                </div>
+                <div className="prediction-equation">
+                  predicted {dataset.yShort} = {line.slope.toFixed(3)} ×{' '}
+                  {predictX.toFixed(1)} + {line.intercept.toFixed(2)} ={' '}
+                  <strong>
+                    {yPredAtX.toFixed(2)} {dataset.yUnit}
+                  </strong>
+                </div>
+                <p className="prediction-note">
+                  This is what your current line would predict for a patient
+                  with {dataset.xShort.toLowerCase()} = {predictX.toFixed(1)}{' '}
+                  {dataset.xUnit}. Drag the purple dot on the plot or the
+                  slider to explore other values.
+                </p>
+              </div>
+            )}
           </div>
           <MetricsPanel
             userSlope={line.slope}
@@ -171,6 +253,7 @@ export default function App() {
             yUnit={dataset.yUnit}
           />
         </div>
+
         <p className="caption">
           The slope tells you how much <strong>{dataset.yLabel}</strong>{' '}
           changes for each one-unit increase in <strong>{dataset.xLabel}</strong>{' '}
@@ -184,17 +267,23 @@ export default function App() {
       <section>
         <h2>3 · How do we measure how good a line is?</h2>
         <p className="prose">
-          For each patient i with observed value <span className="eq">y<sub>i</sub></span>{' '}
-          and predicted value <span className="eq">ŷ<sub>i</sub> = m·x<sub>i</sub> + b</span>,
-          the residual is the gap{' '}
-          <span className="eq">y<sub>i</sub> − ŷ<sub>i</sub></span>. The
-          standard summary is the <strong>mean squared error</strong> (MSE):
+          For each patient i with observed value{' '}
+          <span className="eq">y<sub>i</sub></span> and predicted value{' '}
+          <span className="eq">ŷ<sub>i</sub> = m·x<sub>i</sub> + b</span>, the
+          residual is the gap{' '}
+          <span className="eq">y<sub>i</sub> − ŷ<sub>i</sub></span> — exactly
+          the red segments above. Turn on <em>error squares</em> and you'll see
+          a square of side equal to that gap drawn next to each patient. The
+          area of each square is the residual squared; the average area is the{' '}
+          <strong>mean squared error</strong>:
         </p>
         <p className="eq-block">
           MSE(m, b) = (1/n) · Σ (y<sub>i</sub> − m·x<sub>i</sub> − b)²
         </p>
         <p className="prose">
-          Why <em>squared</em>? Three reasons. (i) It penalises a few large
+          Least-squares regression literally finds the (m, b) that makes the
+          total area of those squares as small as possible. Why{' '}
+          <em>squared</em>? Three reasons. (i) It penalises a few large
           mistakes more than many small ones — clinically appropriate when a
           single very wrong prediction can mislead a treatment decision. (ii)
           It makes the math tractable: the optimum has a closed-form solution.

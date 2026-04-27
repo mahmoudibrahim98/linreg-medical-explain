@@ -166,6 +166,104 @@ code {
   margin: 12px 0 0;
 }
 
+/* Formula cards */
+.formula-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 18px 0 22px;
+}
+
+.formula-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+
+.formula-card.user {
+  border-top: 3px solid var(--user);
+}
+
+.formula-card.best {
+  border-top: 3px solid var(--best);
+}
+
+.formula-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.equation {
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 17px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--ink);
+}
+
+.equation .lhs {
+  position: relative;
+  display: inline-block;
+  font-weight: 600;
+}
+
+.equation .hat {
+  letter-spacing: 0.02em;
+}
+
+.equation .hat-mark {
+  position: absolute;
+  top: -0.65em;
+  left: 50%;
+  transform: translateX(-50%) scaleX(1.4);
+  font-size: 0.75em;
+  color: var(--user);
+  font-weight: 700;
+}
+
+.formula-card.best .equation .hat-mark {
+  color: var(--best);
+}
+
+.equation .op {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.equation .param {
+  background: rgba(31, 111, 235, 0.1);
+  color: var(--accent);
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.formula-card.best .equation .param {
+  background: rgba(44, 160, 44, 0.12);
+  color: var(--best);
+}
+
+.equation .var {
+  font-style: italic;
+  font-weight: 500;
+}
+
+@media (max-width: 700px) {
+  .formula-grid {
+    grid-template-columns: 1fr;
+  }
+  .equation {
+    font-size: 15px;
+  }
+}
+
 /* Plot section */
 .plot-row {
   display: flex;
@@ -209,7 +307,7 @@ code {
 .controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 10px 14px;
   align-items: center;
   font-size: 14px;
   color: var(--ink-soft);
@@ -220,6 +318,158 @@ code {
   align-items: center;
   gap: 6px;
   cursor: pointer;
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 2px;
+}
+
+.swatch-residual {
+  background: #dc2626;
+  height: 3px;
+  width: 14px;
+}
+
+.swatch-square {
+  background: rgba(220, 38, 38, 0.25);
+  border: 1px solid rgba(220, 38, 38, 0.7);
+}
+
+.swatch-best {
+  background: linear-gradient(
+    to right,
+    var(--best) 0,
+    var(--best) 4px,
+    transparent 4px,
+    transparent 7px,
+    var(--best) 7px,
+    var(--best) 11px
+  );
+  height: 3px;
+  width: 14px;
+}
+
+.swatch-pred {
+  background: #7c3aed;
+  border-radius: 50%;
+}
+
+.control-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 700px) {
+  .control-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* Prediction panel */
+.prediction-panel {
+  background: rgba(124, 58, 237, 0.06);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.prediction-header {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7c3aed;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.prediction-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.prediction-slider-row label {
+  font-weight: 500;
+  min-width: 60px;
+}
+
+.prediction-slider-row input[type='range'] {
+  flex: 1;
+  accent-color: #7c3aed;
+}
+
+.prediction-x-readout {
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 13px;
+  color: var(--ink);
+  min-width: 80px;
+  text-align: right;
+}
+
+.prediction-equation {
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 14.5px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin: 6px 0 8px;
+  color: var(--ink);
+}
+
+.prediction-equation strong {
+  color: #7c3aed;
+}
+
+.hat-wrap {
+  position: relative;
+  display: inline-block;
+  font-weight: 600;
+}
+
+.hat-mark-inline {
+  position: absolute;
+  top: -0.6em;
+  left: 50%;
+  transform: translateX(-50%) scaleX(1.4);
+  font-size: 0.75em;
+  color: #7c3aed;
+  font-weight: 700;
+}
+
+.prediction-note {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: 13.5px;
+}
+
+/* Hover labels in scatter plot */
+.scatter-svg .hover-label {
+  font-size: 12px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.scatter-svg .pred-label {
+  font-size: 12px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 3px;
+  stroke-linejoin: round;
 }
 
 .btn {
