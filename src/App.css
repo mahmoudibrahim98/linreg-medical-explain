@@ -545,6 +545,24 @@ code {
   stroke-linejoin: round;
 }
 
+.scatter-svg .threshold-region-label {
+  font-size: 12px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  letter-spacing: 0.01em;
+}
+
+.scatter-svg .threshold-region-label.region-above {
+  fill: #b91c1c;
+}
+
+.scatter-svg .threshold-region-label.region-below {
+  fill: #1e40af;
+}
+
 .controls {
   display: flex;
   flex-wrap: wrap;

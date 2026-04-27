@@ -238,6 +238,17 @@ export default function LogisticPlot({
       .attr('text-anchor', 'middle')
       .attr('fill', '#0d9488')
       .style('display', 'none');
+    // Region labels: which class the model predicts above and below the line.
+    const aboveLabel = thresholdG
+      .append('text')
+      .attr('class', 'threshold-region-label region-above')
+      .attr('text-anchor', 'middle')
+      .style('display', 'none');
+    const belowLabel = thresholdG
+      .append('text')
+      .attr('class', 'threshold-region-label region-below')
+      .attr('text-anchor', 'middle')
+      .style('display', 'none');
 
     function updateUserCurve() {
       const { showUserCurve: shown, curve: c } = stateRef.current;
@@ -302,19 +313,34 @@ export default function LogisticPlot({
       if (!shown || t === undefined || t === null) {
         thresholdLine.style('display', 'none');
         thresholdLabel.style('display', 'none');
+        aboveLabel.style('display', 'none');
+        belowLabel.style('display', 'none');
         return;
       }
+      const yT = yScale(t);
+      const yTop = yScale(1);
+      const yBottom = yScale(0);
       thresholdLine
         .style('display', null)
         .attr('x1', 0)
         .attr('x2', innerW)
-        .attr('y1', yScale(t))
-        .attr('y2', yScale(t));
+        .attr('y1', yT)
+        .attr('y2', yT);
       thresholdLabel
         .style('display', null)
         .attr('x', innerW / 2)
-        .attr('y', yScale(t) - 6)
+        .attr('y', yT - 6)
         .text(`threshold = ${t.toFixed(2)}`);
+      aboveLabel
+        .style('display', null)
+        .attr('x', innerW / 2)
+        .attr('y', (yTop + yT) / 2 + 4)
+        .text(`above the line: model predicts ${positiveLabel}`);
+      belowLabel
+        .style('display', null)
+        .attr('x', innerW / 2)
+        .attr('y', (yT + yBottom) / 2 + 4)
+        .text(`below the line: model predicts ${negativeLabel}`);
     }
 
     // Drag: middle handle horizontally → translate β₀ (curve slides left/right)
