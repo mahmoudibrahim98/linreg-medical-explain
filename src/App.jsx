@@ -38,7 +38,11 @@ export default function App() {
       <nav className="topnav">
         <div className="topnav-inner">
           <span className="topnav-brand">
-            <span className="brand-mark" /> Models in Medicine
+            <span className="brand-mark" />
+            <span className="topnav-brand-text">
+              Models in Medicine
+              <span className="topnav-brand-byline">by Mahmoud Ibrahim</span>
+            </span>
           </span>
           <div className="topnav-links">
             <NavLink href="#/" route="linear" current={route}>

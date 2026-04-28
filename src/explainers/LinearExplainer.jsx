@@ -628,9 +628,9 @@ export default function LinearExplainer() {
 
       <footer className="footer">
         <p>
-          Built for the AI in Medicine course. Data is simulated; clinical
-          parameters are illustrative, not validated. Inspired by the AWS MLU
-          Explain visual essays.
+          By <strong>Mahmoud Ibrahim</strong> for the AI in Medicine course.
+          Data is simulated; clinical parameters are illustrative, not
+          validated. Inspired by the AWS MLU Explain visual essays.
         </p>
       </footer>
     </div>

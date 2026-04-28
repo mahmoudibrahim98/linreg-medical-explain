@@ -1,7 +1,9 @@
-# Linear Regression — A Medical Walkthrough
+# Models in Medicine — Interactive Explainers
 
-An interactive React + D3 explainer of linear regression for AI-in-Medicine
-students, modelled after the AWS MLU-Explain visual essays.
+By **Mahmoud Ibrahim** for the AI in Medicine course at Maastricht
+University. Interactive React + D3 explainers of linear regression,
+logistic regression, and decision trees, modelled after the AWS MLU-Explain
+visual essays.
 
 Four medical scenarios, drag-to-fit line, residuals overlay, MSE/R² panel, and
 a 2-D loss landscape that mirrors the user's line in real time.
