@@ -122,7 +122,7 @@ export default function LinearExplainer() {
 
       <section className="prose">
         <p>
-          A clinician notices a trend: heavier patients tend to have higher
+          A clinician notices a trend: patients with a higher BMI tend to have higher
           blood pressure. Older patients tend to have higher HbA1c. Bigger
           tumors tend to recur more often. We want a way to <em>quantify</em>{' '}
           and <em>predict</em> these trends, not just say "yes, there's a
