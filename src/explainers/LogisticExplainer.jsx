@@ -410,17 +410,23 @@ export default function LogisticExplainer() {
           cross-entropy):
         </p>
         <BlockMath
-          math={String.raw`\mathcal{L}(\beta) \;=\; -\frac{1}{n}\sum_{i=1}^{n}\Bigl[\,y_i \log(p_i) + (1 - y_i)\log(1 - p_i)\,\Bigr]`}
+          math={String.raw`\mathcal{L}(\beta) \;=\; -\frac{1}{n}\sum_{i=1}^{n}\Bigl[\,\textcolor{#dc2626}{y_i\,\log(p_i)} \;+\; \textcolor{#1f6feb}{(1 - y_i)\,\log(1 - p_i)}\,\Bigr]`}
         />
         <p>
-          Reading it patient by patient: if the truth is{' '}
-          <InlineMath math={String.raw`y = 1`} />, the loss is{' '}
-          <InlineMath math={String.raw`-\log(p)`} />, a heavy penalty when{' '}
-          <InlineMath math={String.raw`p`} /> is close to 0. If the truth is{' '}
-          <InlineMath math={String.raw`y = 0`} />, the loss is{' '}
-          <InlineMath math={String.raw`-\log(1 - p)`} />, a heavy penalty
-          when <InlineMath math={String.raw`p`} /> is close to 1. The model
-          is rewarded for confident correct predictions and punished sharply
+          Each patient activates exactly one of the two coloured terms.
+          When the truth is{' '}
+          <InlineMath math={String.raw`\textcolor{#dc2626}{y = 1}`} /> the
+          first term fires (the second multiplies by 1 − 1 = 0) and the
+          loss is{' '}
+          <InlineMath math={String.raw`\textcolor{#dc2626}{-\log(p)}`} />, a
+          heavy penalty when <InlineMath math={String.raw`p`} /> is close
+          to 0. When the truth is{' '}
+          <InlineMath math={String.raw`\textcolor{#1f6feb}{y = 0}`} /> the
+          second term fires (the first multiplies by 0) and the loss is{' '}
+          <InlineMath math={String.raw`\textcolor{#1f6feb}{-\log(1 - p)}`} />
+          , a heavy penalty when{' '}
+          <InlineMath math={String.raw`p`} /> is close to 1. The model is
+          rewarded for confident correct predictions and punished sharply
           for confident wrong ones, which is exactly what we want from a
           clinical probability estimate.
         </p>
