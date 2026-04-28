@@ -393,8 +393,8 @@ export default function LogisticExplainer() {
         </p>
         <LogisticWorkedExample
           points={points}
-          beta0={fit.beta0}
-          beta1={fit.beta1}
+          beta0={curve.beta0}
+          beta1={curve.beta1}
           threshold={threshold}
           xShort={dataset.xShort}
           positiveLabel={dataset.positiveLabel}
@@ -427,11 +427,11 @@ export default function LogisticExplainer() {
 
         <LogisticLossWorkedExample
           points={points}
-          beta0={fit.beta0}
-          beta1={fit.beta1}
+          beta0={curve.beta0}
+          beta1={curve.beta1}
           positiveLabel={dataset.positiveLabel}
           negativeLabel={dataset.negativeLabel}
-          fullLoss={bestLoss}
+          fullLoss={userLoss}
         />
 
         <div className="loss-row" style={{ marginTop: 12 }}>

@@ -126,9 +126,11 @@ export default function LogisticWorkedExample({
           </strong>
         </div>
         <p className="worked-foot">
-          Drag the curve in the plot above and watch every probability and
-          decision in this table update. The same logic, run across the
-          whole cohort, gives you the confusion matrix.
+          The numbers above use your current curve. Drag the curve in
+          section 03 (or pull the β-sliders) and every probability in this
+          table updates immediately. Section 06 shows what happens when we
+          turn these probabilities into yes/no decisions across the whole
+          cohort.
         </p>
       </div>
     </div>
