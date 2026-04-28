@@ -16,6 +16,7 @@ import LogisticPlot from '../components/LogisticPlot';
 import ConfusionMatrix from '../components/ConfusionMatrix';
 import ROCCurve from '../components/ROCCurve';
 import LogisticWorkedExample from '../components/LogisticWorkedExample';
+import LogisticLossWorkedExample from '../components/LogisticLossWorkedExample';
 import { InlineMath, BlockMath } from '../components/Math';
 
 function asMathLabel(label) {
@@ -377,52 +378,6 @@ export default function LogisticExplainer() {
       </section>
 
       <section>
-        <h2>How we measure fit: log-loss</h2>
-        <p>
-          Squared error doesn't behave well when the target is a 0/1 label.
-          Logistic regression uses the <strong>log-loss</strong> (or
-          cross-entropy):
-        </p>
-        <BlockMath
-          math={String.raw`\mathcal{L}(\beta) \;=\; -\frac{1}{n}\sum_{i=1}^{n}\Bigl[\,y_i \log(p_i) + (1 - y_i)\log(1 - p_i)\,\Bigr]`}
-        />
-        <p>
-          Reading it patient by patient: if the truth is{' '}
-          <InlineMath math={String.raw`y = 1`} />, the loss is{' '}
-          <InlineMath math={String.raw`-\log(p)`} />, a heavy penalty when{' '}
-          <InlineMath math={String.raw`p`} /> is close to 0. If the truth is{' '}
-          <InlineMath math={String.raw`y = 0`} />, the loss is{' '}
-          <InlineMath math={String.raw`-\log(1 - p)`} />, a heavy penalty
-          when <InlineMath math={String.raw`p`} /> is close to 1. The model
-          is rewarded for confident correct predictions and punished sharply
-          for confident wrong ones, which is exactly what we want from a
-          clinical probability estimate.
-        </p>
-        <div className="loss-row" style={{ marginTop: 12 }}>
-          <div className="metric-col user" style={{ minWidth: 240 }}>
-            <h3>Your curve</h3>
-            <div className="metric-row">
-              <span className="metric-label">log-loss</span>
-              <span className="metric-value">{userLoss.toFixed(3)}</span>
-            </div>
-          </div>
-          <div className="metric-col best" style={{ minWidth: 240 }}>
-            <h3>Maximum-likelihood fit</h3>
-            <div className="metric-row">
-              <span className="metric-label">log-loss</span>
-              <span className="metric-value">{bestLoss.toFixed(3)}</span>
-            </div>
-            <div className="metric-row">
-              <span className="metric-label">improvement vs. yours</span>
-              <span className="metric-value">
-                {(userLoss - bestLoss).toFixed(3)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section>
         <h2>Walk through one prediction</h2>
         <p>
           Pick three patients from the cohort and trace the calculation. Each
@@ -445,6 +400,62 @@ export default function LogisticExplainer() {
           positiveLabel={dataset.positiveLabel}
           negativeLabel={dataset.negativeLabel}
         />
+      </section>
+
+      <section>
+        <h2>How we measure fit: log-loss</h2>
+        <p>
+          Squared error doesn't behave well when the target is a 0/1 label.
+          Logistic regression uses the <strong>log-loss</strong> (or
+          cross-entropy):
+        </p>
+        <BlockMath
+          math={String.raw`\mathcal{L}(\beta) \;=\; -\frac{1}{n}\sum_{i=1}^{n}\Bigl[\,y_i \log(p_i) + (1 - y_i)\log(1 - p_i)\,\Bigr]`}
+        />
+        <p>
+          Reading it patient by patient: if the truth is{' '}
+          <InlineMath math={String.raw`y = 1`} />, the loss is{' '}
+          <InlineMath math={String.raw`-\log(p)`} />, a heavy penalty when{' '}
+          <InlineMath math={String.raw`p`} /> is close to 0. If the truth is{' '}
+          <InlineMath math={String.raw`y = 0`} />, the loss is{' '}
+          <InlineMath math={String.raw`-\log(1 - p)`} />, a heavy penalty
+          when <InlineMath math={String.raw`p`} /> is close to 1. The model
+          is rewarded for confident correct predictions and punished sharply
+          for confident wrong ones, which is exactly what we want from a
+          clinical probability estimate.
+        </p>
+
+        <LogisticLossWorkedExample
+          points={points}
+          beta0={fit.beta0}
+          beta1={fit.beta1}
+          positiveLabel={dataset.positiveLabel}
+          negativeLabel={dataset.negativeLabel}
+          fullLoss={bestLoss}
+        />
+
+        <div className="loss-row" style={{ marginTop: 12 }}>
+          <div className="metric-col user" style={{ minWidth: 240 }}>
+            <h3>Your curve</h3>
+            <div className="metric-row">
+              <span className="metric-label">log-loss</span>
+              <span className="metric-value">{userLoss.toFixed(3)}</span>
+            </div>
+          </div>
+          <div className="metric-col best" style={{ minWidth: 240 }}>
+            <h3>Maximum-likelihood fit</h3>
+            <div className="metric-row">
+              <span className="metric-label">log-loss</span>
+              <span className="metric-value">{bestLoss.toFixed(3)}</span>
+            </div>
+            <div className="metric-row">
+              <span className="metric-label">improvement vs. yours</span>
+              <span className="metric-value">
+                {(userLoss - bestLoss).toFixed(3)}
+              </span>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section>
