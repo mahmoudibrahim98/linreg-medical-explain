@@ -467,14 +467,22 @@ export default function LogisticExplainer() {
       <section>
         <h2>Turning a probability into a decision</h2>
         <p>
-          A probability is not yet a decision. Some clinical settings demand a
-          low threshold (you'd rather over-call than miss the diagnosis, the{' '}
-          <em>screening</em> setting). Others demand a high threshold (acting
-          on a positive is invasive or expensive, the{' '}
-          <em>confirmation</em> setting). Move
-          the slider below; everything updates: the threshold line on the
-          curve, who the model labels positive, and the four cells of the
-          confusion matrix.
+          A probability is not yet a decision. To act on the model we pick
+          a threshold{' '}
+          <InlineMath math={String.raw`t \in (0, 1)`} /> and apply the
+          decision rule
+        </p>
+        <BlockMath
+          math={String.raw`\hat{y} \;=\; \begin{cases} 1 \quad (\text{${dataset.positiveLabel}}) & \text{if } P \ge t \\ 0 \quad (\text{${dataset.negativeLabel}}) & \text{if } P < t \end{cases}`}
+        />
+        <p>
+          Some clinical settings demand a low threshold (you'd rather
+          over-call than miss the diagnosis, the <em>screening</em> setting).
+          Others demand a high threshold (acting on a positive is invasive
+          or expensive, the <em>confirmation</em> setting). Move the slider
+          below; everything updates: the threshold line on the curve, who
+          the model labels positive, and the four cells of the confusion
+          matrix.
         </p>
 
         <LogisticPlot
@@ -527,6 +535,60 @@ export default function LogisticExplainer() {
           positiveLabel={dataset.positiveLabel}
           negativeLabel={dataset.negativeLabel}
         />
+
+        <h3 className="metric-formulas-title">Reading the matrix</h3>
+        <div className="metric-formulas-grid">
+          <div className="metric-formula-card">
+            <div className="metric-formula-name">Sensitivity (recall)</div>
+            <BlockMath
+              math={String.raw`\dfrac{\textcolor{#047857}{\mathrm{TP}}}{\textcolor{#047857}{\mathrm{TP}} + \textcolor{#92400e}{\mathrm{FN}}}`}
+            />
+            <div className="metric-formula-note">
+              of patients who actually are {dataset.positiveLabel}, the
+              fraction the model catches
+            </div>
+          </div>
+          <div className="metric-formula-card">
+            <div className="metric-formula-name">Specificity</div>
+            <BlockMath
+              math={String.raw`\dfrac{\textcolor{#1e40af}{\mathrm{TN}}}{\textcolor{#1e40af}{\mathrm{TN}} + \textcolor{#b91c1c}{\mathrm{FP}}}`}
+            />
+            <div className="metric-formula-note">
+              of patients who actually are {dataset.negativeLabel}, the
+              fraction the model clears
+            </div>
+          </div>
+          <div className="metric-formula-card">
+            <div className="metric-formula-name">PPV (precision)</div>
+            <BlockMath
+              math={String.raw`\dfrac{\textcolor{#047857}{\mathrm{TP}}}{\textcolor{#047857}{\mathrm{TP}} + \textcolor{#b91c1c}{\mathrm{FP}}}`}
+            />
+            <div className="metric-formula-note">
+              of model-positives, the fraction that really are{' '}
+              {dataset.positiveLabel}
+            </div>
+          </div>
+          <div className="metric-formula-card">
+            <div className="metric-formula-name">NPV</div>
+            <BlockMath
+              math={String.raw`\dfrac{\textcolor{#1e40af}{\mathrm{TN}}}{\textcolor{#1e40af}{\mathrm{TN}} + \textcolor{#92400e}{\mathrm{FN}}}`}
+            />
+            <div className="metric-formula-note">
+              of model-negatives, the fraction that really are{' '}
+              {dataset.negativeLabel}
+            </div>
+          </div>
+          <div className="metric-formula-card metric-formula-card-wide">
+            <div className="metric-formula-name">Accuracy</div>
+            <BlockMath
+              math={String.raw`\dfrac{\textcolor{#047857}{\mathrm{TP}} + \textcolor{#1e40af}{\mathrm{TN}}}{\textcolor{#047857}{\mathrm{TP}} + \textcolor{#1e40af}{\mathrm{TN}} + \textcolor{#b91c1c}{\mathrm{FP}} + \textcolor{#92400e}{\mathrm{FN}}}`}
+            />
+            <div className="metric-formula-note">
+              overall fraction correct (often misleading when classes are
+              imbalanced)
+            </div>
+          </div>
+        </div>
 
         <p className="caption">
           As you raise the threshold, fewer patients get labelled{' '}
